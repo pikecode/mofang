@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1778311923697,
+  "lastScanned": 1779329046296,
   "projectRoot": "/Users/peakom/works/mofang",
   "techStack": {
     "languages": [
@@ -73,7 +73,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 1,
-      "lastAccessed": 1778311923568,
+      "lastAccessed": 1779329046196,
       "keyFiles": [
         "index.html"
       ]
@@ -82,7 +82,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 3,
-      "lastAccessed": 1778311923569,
+      "lastAccessed": 1779329046197,
       "keyFiles": [
         "考核任务.md",
         "魔方网表TOKEN使用说明V1.1.pdf",
@@ -93,7 +93,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 4,
-      "lastAccessed": 1778311923572,
+      "lastAccessed": 1779329046197,
       "keyFiles": [
         "App.tsx",
         "index.css",
@@ -105,17 +105,17 @@
       "path": "dist/assets",
       "purpose": "Static assets",
       "fileCount": 2,
-      "lastAccessed": 1778311923613,
+      "lastAccessed": 1779329046197,
       "keyFiles": [
-        "index-Dn88S99K.js",
-        "index-DxS1fUNh.css"
+        "index-BZDXnFS8.js",
+        "index-BrU1oTC0.css"
       ]
     },
     "src/api": {
       "path": "src/api",
       "purpose": "API routes",
       "fileCount": 2,
-      "lastAccessed": 1778311923617,
+      "lastAccessed": 1779329046205,
       "keyFiles": [
         "auth.ts",
         "permission.ts"
@@ -125,14 +125,14 @@
       "path": "src/components",
       "purpose": "UI components",
       "fileCount": 0,
-      "lastAccessed": 1778311923619,
+      "lastAccessed": 1779329046246,
       "keyFiles": []
     },
     "src/lib": {
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 1,
-      "lastAccessed": 1778311923620,
+      "lastAccessed": 1779329046254,
       "keyFiles": [
         "utils.ts"
       ]
@@ -141,7 +141,7 @@
       "path": "src/types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1778311923631,
+      "lastAccessed": 1779329046259,
       "keyFiles": [
         "index.ts"
       ]
@@ -150,80 +150,134 @@
   "hotPaths": [
     {
       "path": "src/api/permission.ts",
-      "accessCount": 31,
-      "lastAccessed": 1778314489749,
+      "accessCount": 40,
+      "lastAccessed": 1779351789115,
       "type": "file"
     },
     {
       "path": "src/App.tsx",
-      "accessCount": 13,
-      "lastAccessed": 1778313620019,
+      "accessCount": 29,
+      "lastAccessed": 1779351012563,
       "type": "file"
     },
     {
       "path": "src/hooks/usePermissionQuery.ts",
-      "accessCount": 10,
-      "lastAccessed": 1778313077169,
+      "accessCount": 24,
+      "lastAccessed": 1779351788715,
+      "type": "file"
+    },
+    {
+      "path": "vite.config.ts",
+      "accessCount": 8,
+      "lastAccessed": 1779349665845,
       "type": "file"
     },
     {
       "path": "src/api/auth.ts",
-      "accessCount": 9,
-      "lastAccessed": 1778313605012,
-      "type": "file"
-    },
-    {
-      "path": "nginx.conf",
-      "accessCount": 6,
-      "lastAccessed": 1778312920701,
-      "type": "file"
-    },
-    {
-      "path": "deploy.sh",
-      "accessCount": 4,
-      "lastAccessed": 1778312921167,
+      "accessCount": 7,
+      "lastAccessed": 1779351789014,
       "type": "file"
     },
     {
       "path": "docs/考核任务.md",
       "accessCount": 4,
-      "lastAccessed": 1778314061548,
-      "type": "file"
-    },
-    {
-      "path": "vite.config.ts",
-      "accessCount": 3,
-      "lastAccessed": 1778312541252,
-      "type": "file"
-    },
-    {
-      "path": ".env",
-      "accessCount": 3,
-      "lastAccessed": 1778313585784,
-      "type": "file"
-    },
-    {
-      "path": "README.md",
-      "accessCount": 2,
-      "lastAccessed": 1778311946954,
-      "type": "file"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 2,
-      "lastAccessed": 1778313065344,
+      "lastAccessed": 1779349707755,
       "type": "file"
     },
     {
       "path": "src/types/index.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779350165146,
+      "type": "file"
+    },
+    {
+      "path": "src/index.css",
+      "accessCount": 3,
+      "lastAccessed": 1779350295362,
+      "type": "file"
+    },
+    {
+      "path": "docs/前端开发二阶段考核任务.md",
       "accessCount": 2,
-      "lastAccessed": 1778313077886,
+      "lastAccessed": 1779332966061,
+      "type": "file"
+    },
+    {
+      "path": "docs/token使用说明.md",
+      "accessCount": 2,
+      "lastAccessed": 1779339681891,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1779329375381,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1779329375543,
+      "type": "file"
+    },
+    {
+      "path": "index.html",
+      "accessCount": 1,
+      "lastAccessed": 1779329375661,
+      "type": "file"
+    },
+    {
+      "path": "deploy.sh",
+      "accessCount": 1,
+      "lastAccessed": 1779331200306,
+      "type": "file"
+    },
+    {
+      "path": ".env",
+      "accessCount": 1,
+      "lastAccessed": 1779331200639,
       "type": "file"
     },
     {
       "path": "Dockerfile",
       "accessCount": 1,
-      "lastAccessed": 1778312371037,
+      "lastAccessed": 1779331402321,
+      "type": "file"
+    },
+    {
+      "path": "src/main.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779333197687,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779333197758,
+      "type": "file"
+    },
+    {
+      "path": ".playwright-mcp/console-2026-05-21T06-28-08-944Z.log",
+      "accessCount": 1,
+      "lastAccessed": 1779344913981,
+      "type": "file"
+    },
+    {
+      "path": ".playwright-mcp/page-2026-05-21T06-28-09-166Z.yml",
+      "accessCount": 1,
+      "lastAccessed": 1779345046128,
+      "type": "file"
+    },
+    {
+      "path": ".playwright-mcp/page-2026-05-21T06-44-06-178Z.yml",
+      "accessCount": 1,
+      "lastAccessed": 1779345896542,
+      "type": "file"
+    },
+    {
+      "path": "docs/实现文档.md",
+      "accessCount": 1,
+      "lastAccessed": 1779349798196,
       "type": "file"
     }
   ],

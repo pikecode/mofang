@@ -1,151 +1,109 @@
 import type { Authority, ItemActionGroup, ItemTypeAcl, ItemAcl } from '@/types'
 import { authenticatedFetch } from './auth'
 
-// 从URL获取spaceId（或使用默认值）
+// 开发模式走 proxy，生产模式走同源
+const isDev = import.meta.env.DEV
+const apiBase = isDev ? '/magicflu/service' : '/magicflu/service'
+
+// 默认spaceId
 const DEFAULT_SPACE_ID = 'a1c747bb-8dd2-4e1d-813e-d16416d989cf'
 
 export function getSpaceId(): string {
   const urlParams = new URLSearchParams(window.location.search)
-  const spaceId = urlParams.get('spaceId')
-  return spaceId || DEFAULT_SPACE_ID
+  return urlParams.get('spaceId') || DEFAULT_SPACE_ID
 }
 
 // 解析XML响应
-function parseXMLResponse(xmlText: string): Document {
-  // 检查返回的是否为HTML错误页面
+function parseXML(xmlText: string): Document {
   if (xmlText.trim().startsWith('<!DOCTYPE html>') || xmlText.trim().startsWith('<html')) {
-    throw new Error('API返回HTML页面而非XML，请检查登录状态或API路径')
+    throw new Error('API返回HTML页面，请检查鉴权状态')
   }
-  const parser = new DOMParser()
-  return parser.parseFromString(xmlText, 'application/xml')
+  return new DOMParser().parseFromString(xmlText, 'application/xml')
 }
 
-// 从XML提取权限主体列表
-function extractAuthoritiesFromXML(doc: Document): Authority[] {
+// 从XML提取权限主体
+function extractAuthorities(doc: Document): Authority[] {
   const entries = doc.querySelectorAll('feed entry')
-  const authorities: Authority[] = []
+  const result: Authority[] = []
 
   entries.forEach((entry) => {
     const content = entry.querySelector('content')
     if (!content) return
+    const el = content.querySelector('authority') || content.querySelector('authoriy')
+    if (!el) return
 
-    // 尝试多种可能的元素名（authority 或 authoriy）
-    const authorityEl = content.querySelector('authority') || content.querySelector('authoriy')
-    if (!authorityEl) return
-
-    const typeId = authorityEl.querySelector('typeId')?.textContent
-    const authId = authorityEl.querySelector('authId')?.textContent
-    const parentId = authorityEl.querySelector('parentId')?.textContent
-    const name = authorityEl.querySelector('name')?.textContent
-    const description = authorityEl.querySelector('description')?.textContent
-
+    const typeId = el.querySelector('typeId')?.textContent
+    const authId = el.querySelector('authId')?.textContent
     if (typeId && authId) {
-      authorities.push({
+      result.push({
         typeId: parseInt(typeId),
         authId,
-        parentId: parentId || undefined,
-        name: name || description || undefined,
+        parentId: el.querySelector('parentId')?.textContent || undefined,
+        name: el.querySelector('name')?.textContent || el.querySelector('description')?.textContent || undefined,
       })
     }
   })
-
-  return authorities
+  return result
 }
 
-// 查询用户和用户所在用户组权限主体
-export async function fetchUserAuthorities(
-  spaceId: string,
-  digitalId: string,
-): Promise<Authority[]> {
-  const bq = `(digitalid,eq,${digitalId})`
-  const url = `/magicflu/s/${spaceId}/authorities/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`
-
+// 通用XML请求
+async function xmlGet(url: string): Promise<Document> {
   const response = await authenticatedFetch(url)
-  if (!response.ok) {
-    throw new Error(`获取用户权限主体失败: ${response.status}`)
-  }
-
-  const xmlText = await response.text()
-  const doc = parseXMLResponse(xmlText)
-  return extractAuthoritiesFromXML(doc)
+  if (!response.ok) throw new Error(`请求失败: ${response.status}`)
+  return parseXML(await response.text())
 }
 
-// 查询已登录用户组权限主体
+// ==================== 权限主体接口 ====================
+
+export async function fetchUserAuthorities(spaceId: string, digitalId: string): Promise<Authority[]> {
+  const bq = `(digitalid,eq,${digitalId})`
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/authorities/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`)
+  return extractAuthorities(doc)
+}
+
 export async function fetchLoggedInUserAuthority(spaceId: string): Promise<Authority | null> {
   const bq = `(typeid,eq,5)`
-  const url = `/magicflu/s/${spaceId}/authorities/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`
-
-  const response = await authenticatedFetch(url)
-  if (!response.ok) {
-    throw new Error(`获取已登录用户权限主体失败: ${response.status}`)
-  }
-
-  const xmlText = await response.text()
-  const doc = parseXMLResponse(xmlText)
-  const authorities = extractAuthoritiesFromXML(doc)
-  return authorities.length > 0 ? authorities[0] : null
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/authorities/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`)
+  const auths = extractAuthorities(doc)
+  return auths.length > 0 ? auths[0] : null
 }
 
-// 查询用户所在组织结构节点及用户组权限主体
-export async function fetchOrgAuthorities(
-  spaceId: string,
-  digitalId: string,
-): Promise<Authority[]> {
-  const url = `/magicflu/s/${spaceId}/authorities/feed?digitalId=${encodeURIComponent(digitalId)}&forOrg=true&start=0&limit=-1`
-
-  const response = await authenticatedFetch(url)
-  if (!response.ok) {
-    throw new Error(`获取组织结构权限主体失败: ${response.status}`)
-  }
-
-  const xmlText = await response.text()
-  const doc = parseXMLResponse(xmlText)
-  return extractAuthoritiesFromXML(doc)
+export async function fetchAuthorityByTypeId(spaceId: string, typeId: number): Promise<Authority | null> {
+  const bq = `(typeid,eq,${typeId})`
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/authorities/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`)
+  const auths = extractAuthorities(doc)
+  return auths.length > 0 ? auths[0] : null
 }
 
-// 查询系统保留组权限主体
+export async function fetchOrgAuthorities(spaceId: string, digitalId: string): Promise<Authority[]> {
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/authorities/feed?digitalId=${encodeURIComponent(digitalId)}&forOrg=true&start=0&limit=-1`)
+  return extractAuthorities(doc)
+}
+
 export async function fetchSystemGroupAuthorities(spaceId: string): Promise<Authority[]> {
-  const systemTypes = [4, 7, 9, 10] // 空间管理员、代管理员、审计员、流程管理员
-  const authorities: Authority[] = []
+  const systemTypes = [4, 7, 9, 10]
+  const result: Authority[] = []
 
   for (const typeId of systemTypes) {
-    const bq = `(typeid,eq,${typeId})`
-    const url = `/magicflu/s/${spaceId}/authorities/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`
-
     try {
-      const response = await authenticatedFetch(url)
-      if (response.ok) {
-        const xmlText = await response.text()
-        const doc = parseXMLResponse(xmlText)
-        const typeAuthorities = extractAuthoritiesFromXML(doc)
-        authorities.push(...typeAuthorities)
-      }
+      const auth = await fetchAuthorityByTypeId(spaceId, typeId)
+      if (auth) result.push(auth)
     } catch {
-      // 忽略单个失败的请求
+      // 忽略
     }
   }
-
-  return authorities
+  return result
 }
 
-// 查询对象类/对象权限模板
-export async function fetchItemActionGroups(
-  spaceId: string,
-  itemTypeId: number,
-): Promise<ItemActionGroup[]> {
+// ==================== 操作模板接口 ====================
+
+export async function fetchItemActionGroups(spaceId: string, itemTypeId: number): Promise<ItemActionGroup[]> {
   const bq = `(itemtypeid,eq,${itemTypeId})`
-  const url = `/magicflu/s/${spaceId}/itemactiongroups/feed?start=0&limit=20&bq=${encodeURIComponent(bq)}`
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/itemactiongroups/feed?start=0&limit=20&bq=${encodeURIComponent(bq)}`)
 
-  const response = await authenticatedFetch(url)
-  if (!response.ok) {
-    throw new Error(`获取操作模板失败: ${response.status}`)
-  }
-
-  const xmlText = await response.text()
-  const doc = parseXMLResponse(xmlText)
-  const entries = doc.querySelectorAll('entry')
-
+  const entries = doc.querySelectorAll('feed entry')
   const groups: ItemActionGroup[] = []
+
   entries.forEach((entry) => {
     const groupName = entry.querySelector('content itemActionGroup groupName')?.textContent
     const aclCoding = entry.querySelector('content itemActionGroup aclCoding')?.textContent
@@ -159,28 +117,18 @@ export async function fetchItemActionGroups(
       })
     }
   })
-
   return groups
 }
 
-// 查询对象类权限设置
-export async function fetchItemTypeAcls(
-  spaceId: string,
-  authId: string,
-): Promise<ItemTypeAcl[]> {
+// ==================== 对象类权限接口 ====================
+
+export async function fetchItemTypeAcls(spaceId: string, authId: string): Promise<ItemTypeAcl[]> {
   const bq = `(authorityid,eq,${authId})`
-  const url = `/magicflu/s/${spaceId}/itemtypeacls/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/itemtypeacls/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`)
 
-  const response = await authenticatedFetch(url)
-  if (!response.ok) {
-    throw new Error(`获取对象类权限失败: ${response.status}`)
-  }
-
-  const xmlText = await response.text()
-  const doc = parseXMLResponse(xmlText)
   const entries = doc.querySelectorAll('feed entry')
-
   const acls: ItemTypeAcl[] = []
+
   entries.forEach((entry) => {
     const acl = entry.querySelector('content itemTypeAcl acl')?.textContent
     const itemParentId = entry.querySelector('content itemTypeAcl itemParentId')?.textContent
@@ -194,28 +142,18 @@ export async function fetchItemTypeAcls(
       })
     }
   })
-
   return acls
 }
 
-// 查询对象权限设置
-export async function fetchItemAcls(
-  spaceId: string,
-  authId: string,
-): Promise<ItemAcl[]> {
+// ==================== 对象权限接口 ====================
+
+export async function fetchItemAcls(spaceId: string, authId: string): Promise<ItemAcl[]> {
   const bq = `(authorityid,eq,${authId})`
-  const url = `/magicflu/s/${spaceId}/itemacls/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`
+  const doc = await xmlGet(`${apiBase}/s/${spaceId}/itemacls/feed?bq=${encodeURIComponent(bq)}&start=0&limit=-1`)
 
-  const response = await authenticatedFetch(url)
-  if (!response.ok) {
-    throw new Error(`获取对象权限失败: ${response.status}`)
-  }
-
-  const xmlText = await response.text()
-  const doc = parseXMLResponse(xmlText)
   const entries = doc.querySelectorAll('feed entry')
-
   const acls: ItemAcl[] = []
+
   entries.forEach((entry) => {
     const acl = entry.querySelector('content itemAcl acl')?.textContent
     const itemTypeId = entry.querySelector('content itemAcl itemTypeId')?.textContent
@@ -229,117 +167,83 @@ export async function fetchItemAcls(
       })
     }
   })
-
   return acls
 }
 
-// 查询表单名称
-export async function fetchFormName(spaceId: string, formId: string): Promise<string> {
-  const bq = `(id,eq,${formId})`
-  const url = `/magicflu/s/${spaceId}/forms/feed?start=0&limit=-1&bq=${encodeURIComponent(bq)}`
+// ==================== 对象名称接口 ====================
 
+export async function fetchFormName(spaceId: string, formId: string): Promise<string> {
   try {
-    const response = await authenticatedFetch(url)
-    if (response.ok) {
-      const xmlText = await response.text()
-      const doc = parseXMLResponse(xmlText)
-      const label = doc.querySelector('feed entry content form')?.getAttribute('label')
-      return label || formId
-    }
+    const bq = `(id,eq,${formId})`
+    const doc = await xmlGet(`${apiBase}/s/${spaceId}/forms/feed?start=0&limit=-1&bq=${encodeURIComponent(bq)}`)
+    return doc.querySelector('feed entry content form')?.getAttribute('label') || formId
   } catch {
-    // 忽略失败
+    return formId
   }
-  return formId
 }
 
-// 查询导航树名称
 export async function fetchAppName(spaceId: string, appId: string): Promise<string> {
-  const bq = `(id,eq,${appId})`
-  const url = `/magicflu/s/json/${spaceId}/apps/feed?bq=${encodeURIComponent(bq)}`
-
   try {
-    const response = await authenticatedFetch(url)
+    const bq = `(id,eq,${appId})`
+    const response = await authenticatedFetch(`${apiBase}/s/json/${spaceId}/apps/feed?bq=${encodeURIComponent(bq)}`)
     if (response.ok) {
       const json = await response.json()
       return json?.feed?.entry?.content?.app?.label || appId
     }
   } catch {
-    // 忽略失败
+    // 忽略
   }
   return appId
 }
 
-// 查询分析项目名称
 export async function fetchAdhocProjectName(spaceId: string, projectId: string): Promise<string> {
-  const bq = `(id,eq,${projectId})`
-  const url = `/magicflu/s/json/${spaceId}/adhocs/feed?bq=${encodeURIComponent(bq)}`
-
   try {
-    const response = await authenticatedFetch(url)
+    const bq = `(id,eq,${projectId})`
+    const response = await authenticatedFetch(`${apiBase}/s/json/${spaceId}/adhocs/feed?bq=${encodeURIComponent(bq)}`)
     if (response.ok) {
       const json = await response.json()
-      return json?.entry?.content?.adhocProject?.name || projectId
+      const entry = json?.feed?.entry || json?.entry
+      return entry?.content?.adhocProject?.name || projectId
     }
   } catch {
-    // 忽略失败
+    // 忽略
   }
   return projectId
 }
 
-// 查询分析工作簿名称
 export async function fetchWorkbookName(spaceId: string, workbookId: string): Promise<string> {
-  const bq = `(id,eq,${workbookId})`
-  const url = `/magicflu/s/json/${spaceId}/workbooks/feed?bq=${encodeURIComponent(bq)}`
-
   try {
-    const response = await authenticatedFetch(url)
+    const bq = `(id,eq,${workbookId})`
+    const response = await authenticatedFetch(`${apiBase}/s/json/${spaceId}/workbooks/feed?bq=${encodeURIComponent(bq)}`)
     if (response.ok) {
       const json = await response.json()
-      return json?.entry?.content?.workbook?.name || workbookId
+      const entry = json?.feed?.entry || json?.entry
+      return entry?.content?.workbook?.name || workbookId
     }
   } catch {
-    // 忽略失败
+    // 忽略
   }
   return workbookId
 }
 
-// 查询问卷名称
 export async function fetchSurveyName(spaceId: string, surveyId: string): Promise<string> {
-  const bq = `(id,eq,${surveyId})`
-  const url = `/magicflu/s/${spaceId}/surveys/feed?start=0&limit=-1&bq=${encodeURIComponent(bq)}`
-
   try {
-    const response = await authenticatedFetch(url)
-    if (response.ok) {
-      const xmlText = await response.text()
-      const doc = parseXMLResponse(xmlText)
-      const label = doc.querySelector('feed entry content survey')?.getAttribute('label')
-      return label || surveyId
-    }
+    const bq = `(id,eq,${surveyId})`
+    const doc = await xmlGet(`${apiBase}/s/${spaceId}/surveys/feed?start=0&limit=-1&bq=${encodeURIComponent(bq)}`)
+    return doc.querySelector('feed entry content survey')?.getAttribute('label') || surveyId
   } catch {
-    // 忽略失败
+    return surveyId
   }
-  return surveyId
 }
 
-// 根据对象类型和ID获取名称
-export async function fetchItemName(
-  spaceId: string,
-  itemTypeId: number,
-  itemId: string,
-): Promise<string> {
+// 根据对象类型获取名称
+export async function fetchItemName(spaceId: string, itemTypeId: number, itemId: string): Promise<string> {
   switch (itemTypeId) {
-    case 2:
-      return await fetchFormName(spaceId, itemId)
-    case 15:
-      return await fetchAdhocProjectName(spaceId, itemId)
-    case 16:
-      return await fetchWorkbookName(spaceId, itemId)
-    case 17:
-      return await fetchAppName(spaceId, itemId)
-    case 18:
-      return await fetchSurveyName(spaceId, itemId)
-    default:
-      return itemId
+    case 2: return fetchFormName(spaceId, itemId)
+    case 15: return fetchAdhocProjectName(spaceId, itemId)
+    case 16: return fetchWorkbookName(spaceId, itemId)
+    case 17: return fetchAppName(spaceId, itemId)
+    case 18: return fetchSurveyName(spaceId, itemId)
+    default: return itemId
   }
 }

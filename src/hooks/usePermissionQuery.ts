@@ -5,11 +5,11 @@ import {
   fetchOrgAuthorities,
   fetchLoggedInUserAuthority,
   fetchSystemGroupAuthorities,
+  fetchAuthorityByTypeId,
   fetchItemTypeAcls,
   fetchItemAcls,
   fetchItemActionGroups,
   fetchItemName,
-  getSpaceId,
 } from '@/api/permission'
 import { AUTH_TYPE_MAP, ITEM_TYPE_MAP } from '@/types'
 
@@ -32,11 +32,17 @@ export interface ItemPermissionGroup {
 
 interface PermissionSummary {
   digitalId: string
+  spaceId: string
   authorities: Authority[]
   itemTypeAcls: Map<number, ItemTypeAcl[]>
   itemAcls: Map<string, ItemAclWithName[]>
   actionGroups: Map<number, { name: string; aclCoding: number }[]>
   itemPermissionGroups: ItemPermissionGroup[]
+  stats: {
+    authorityCount: number
+    itemPermissionCount: number
+    itemTypePermissionCount: number
+  }
   error?: string
 }
 
@@ -44,25 +50,21 @@ interface UsePermissionQueryReturn {
   summary: PermissionSummary | null
   loading: boolean
   error: string | null
-  queryPermission: (digitalId: string) => Promise<void>
-  spaceId: string
+  queryPermission: (spaceId: string, digitalId: string) => Promise<void>
 }
 
 export function usePermissionQuery(): UsePermissionQueryReturn {
   const [summary, setSummary] = useState<PermissionSummary | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [spaceId] = useState(() => {
-    try {
-      return getSpaceId()
-    } catch (e) {
-      return ''
-    }
-  })
 
-  const queryPermission = useCallback(async (digitalId: string) => {
-    if (!spaceId) {
-      setError('缺少spaceId参数，请在URL中添加 ?spaceId=xxx')
+  const queryPermission = useCallback(async (spaceId: string, digitalId: string) => {
+    if (!spaceId.trim()) {
+      setError('请输入空间ID (spaceId)')
+      return
+    }
+    if (!digitalId.trim()) {
+      setError('请输入用户登录账号')
       return
     }
 
@@ -95,11 +97,31 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
         if (loggedInAuth) {
           allAuthorities.push(loggedInAuth)
         }
-      } catch (e) {
+      } catch {
         // 忽略
       }
 
-      // 1.4 系统保留组权限
+      // 1.4 未登录用户权限(typeId=3)
+      try {
+        const anonAuth = await fetchAuthorityByTypeId(spaceId, 3)
+        if (anonAuth) {
+          allAuthorities.push(anonAuth)
+        }
+      } catch {
+        // 忽略
+      }
+
+      // 1.5 创建人权限(typeId=6)
+      try {
+        const creatorAuth = await fetchAuthorityByTypeId(spaceId, 6)
+        if (creatorAuth) {
+          allAuthorities.push(creatorAuth)
+        }
+      } catch {
+        // 忽略
+      }
+
+      // 1.6 系统保留组权限
       try {
         const systemAuths = await fetchSystemGroupAuthorities(spaceId)
         allAuthorities.push(...systemAuths)
@@ -109,12 +131,14 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
 
       if (allAuthorities.length === 0) {
         setSummary({
+          spaceId,
           digitalId,
           authorities: [],
           itemTypeAcls: new Map(),
           itemAcls: new Map(),
           actionGroups: new Map(),
           itemPermissionGroups: [],
+          stats: { authorityCount: 0, itemPermissionCount: 0, itemTypePermissionCount: 0 },
           error: '未找到该用户的任何权限主体',
         })
         setLoading(false)
@@ -122,54 +146,46 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
       }
 
       // 2. 查询所有对象类权限（只查询有权限的对象类型）
-      const itemTypeAcls = new Map<number, ItemTypeAcl[]>()
-      const actionGroups = new Map<number, { name: string; aclCoding: number }[]>()
-
-      // 先收集所有对象类权限（不区分类型），然后按类型分组
       const allItemTypeAcls = new Map<number, ItemTypeAcl[]>()
 
       for (const auth of allAuthorities) {
         try {
           const acls = await fetchItemTypeAcls(spaceId, auth.authId)
-          // 按对象类型分组
           acls.forEach((acl) => {
-            // 从itemParentId或itemTypeValue推断对象类型
-            // 对象类权限的itemParentId通常是对象类型ID
             const itemTypeId = acl.itemTypeValue ? parseInt(acl.itemTypeValue) : 0
-            if (!allItemTypeAcls.has(itemTypeId)) {
-              allItemTypeAcls.set(itemTypeId, [])
-            }
-            const existing = allItemTypeAcls.get(itemTypeId)!
-            const sameAcl = existing.find(
+            const existing = allItemTypeAcls.get(itemTypeId) || []
+            const merged = existing.find(
               (m) =>
                 m.itemParentId === acl.itemParentId &&
                 m.itemTypeValue === acl.itemTypeValue,
             )
-            if (sameAcl) {
-              sameAcl.acl = mergeAclStrings(sameAcl.acl, acl.acl)
+            if (merged) {
+              existing.push({ ...merged, acl: mergeAclStrings(merged.acl, acl.acl) })
+              const idx = existing.indexOf(merged)
+              existing.splice(idx, 1)
             } else {
               existing.push({ ...acl })
             }
+            allItemTypeAcls.set(itemTypeId, existing)
           })
-        } catch (e) {
+        } catch {
           // 忽略单个权限主体的错误
         }
       }
 
-      // 只查询有权限的对象类型的操作组
-      allItemTypeAcls.forEach((acls, itemTypeId) => {
-        itemTypeAcls.set(itemTypeId, acls)
-        try {
-          fetchItemActionGroups(spaceId, itemTypeId).then((groups) => {
-            actionGroups.set(
-              itemTypeId,
-              groups.map((g) => ({ name: g.groupName, aclCoding: g.aclCoding })),
-            )
-          })
-        } catch (e) {
-          // 忽略
-        }
-      })
+      // 用 await 查询所有操作组（避免竞态）
+      const actionGroupEntries = await Promise.all(
+        Array.from(allItemTypeAcls.keys()).map(async (itemTypeId) => {
+          try {
+            const groups = await fetchItemActionGroups(spaceId, itemTypeId)
+            return [itemTypeId, groups.map((g) => ({ name: g.groupName, aclCoding: g.aclCoding }))] as const
+          } catch {
+            return [itemTypeId, [] as { name: string; aclCoding: number }[]] as const
+          }
+        }),
+      )
+      const actionGroups = new Map(actionGroupEntries)
+      const itemTypeAcls = new Map(allItemTypeAcls)
 
       // 3. 查询所有对象权限并获取名称
       const itemAcls = new Map<string, ItemAclWithName[]>()
@@ -181,7 +197,6 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
           for (const acl of acls) {
             const key = `${acl.itemTypeId}:${acl.itemId}`
 
-            // 获取对象名称（带缓存）
             const cacheKey = `${acl.itemTypeId}:${acl.itemId}`
             if (!itemNamesCache.has(cacheKey)) {
               try {
@@ -199,11 +214,15 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
 
             const existing = itemAcls.get(key)
             if (existing) {
-              const sameItem = existing.find(
+              const merged = existing.find(
                 (e) => e.itemTypeId === acl.itemTypeId && e.itemId === acl.itemId,
               )
-              if (sameItem) {
-                sameItem.acl = mergeAclStrings(sameItem.acl, acl.acl)
+              if (merged) {
+                existing.push({
+                  ...merged,
+                  acl: mergeAclStrings(merged.acl, acl.acl),
+                })
+                existing.splice(existing.indexOf(merged), 1)
               } else {
                 existing.push(aclWithName)
               }
@@ -211,7 +230,7 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
               itemAcls.set(key, [aclWithName])
             }
           }
-        } catch (e) {
+        } catch {
           // 忽略
         }
       }
@@ -264,27 +283,37 @@ export function usePermissionQuery(): UsePermissionQueryReturn {
       // 按对象类型ID排序
       itemPermissionGroups.sort((a, b) => a.itemTypeId - b.itemTypeId)
 
+      // 计算统计
+      let itemPermissionCount = 0
+      itemPermissionGroups.forEach((g) => { itemPermissionCount += g.items.length })
+      const itemTypePermissionCount = Array.from(allItemTypeAcls.values()).reduce((sum, acls) => sum + acls.length, 0)
+
       setSummary({
+        spaceId,
         digitalId,
         authorities: allAuthorities,
         itemTypeAcls,
         itemAcls,
         actionGroups,
         itemPermissionGroups,
+        stats: {
+          authorityCount: allAuthorities.length,
+          itemPermissionCount,
+          itemTypePermissionCount,
+        },
       })
     } catch (e) {
       setError(e instanceof Error ? e.message : '查询权限失败')
     } finally {
       setLoading(false)
     }
-  }, [spaceId])
+  }, [])
 
   return {
     summary,
     loading,
     error,
     queryPermission,
-    spaceId,
   }
 }
 

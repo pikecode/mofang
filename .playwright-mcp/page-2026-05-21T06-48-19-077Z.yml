@@ -1,0 +1,75 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: 魔
+        - generic [ref=e8]: 魔方网表 · RBAC 权限查看器
+      - generic [ref=e9]:
+        - generic [ref=e20]: "空间ID: a1c747bb-8dd2-4e1d-813e-d16416d989cf"
+        - generic [ref=e21]: "查询账号: mfiv202602130001"
+        - generic [ref=e22]: ⚠ 未找到该用户的任何权限主体
+        - generic [ref=e11]: 👤
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - textbox "空间ID (spaceId)" [ref=e14]: a1c747bb-8dd2-4e1d-813e-d16416d989cf
+      - generic [ref=e15]:
+        - textbox "用户登录账号" [active] [ref=e16]: mfiv202602130001
+        - img [ref=e17]
+      - button "查询" [ref=e23] [cursor=pointer]:
+        - img
+        - text: 查询
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: 权限主体
+        - generic [ref=e27]: "0"
+      - generic [ref=e28]:
+        - generic [ref=e29]: 对象权限
+        - generic [ref=e30]: "0"
+      - generic [ref=e31]:
+        - generic [ref=e32]: 对象类权限
+        - generic [ref=e33]: "0"
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - button "对象权限" [ref=e37] [cursor=pointer]
+          - button "对象类权限" [ref=e38] [cursor=pointer]
+          - button "权限主体" [ref=e39] [cursor=pointer]
+        - generic [ref=e40]:
+          - generic [ref=e41]: 筛选：
+          - combobox [ref=e42]:
+            - option "全部对象类型" [selected]
+          - combobox [ref=e43]:
+            - option "全部权限主体类型" [selected]
+          - textbox "搜索对象名称/ID" [ref=e44]
+          - button "重置" [ref=e45] [cursor=pointer]
+        - generic [ref=e46]:
+          - generic [ref=e47]: 共 0 条对象权限
+          - table [ref=e49]:
+            - rowgroup [ref=e50]:
+              - row "序号 对象ID 对象名称 权限操作 对象类型" [ref=e51]:
+                - columnheader "序号" [ref=e52]
+                - columnheader "对象ID" [ref=e53]
+                - columnheader "对象名称" [ref=e54]
+                - columnheader "权限操作" [ref=e55]
+                - columnheader "对象类型" [ref=e56]
+            - rowgroup [ref=e57]:
+              - row "无匹配数据" [ref=e58]:
+                - cell "无匹配数据" [ref=e59]
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - heading "当前用户会话" [level=3] [ref=e63]:
+            - text: 当前用户会话
+            - img [ref=e64]
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e69]: 登录账号
+              - generic [ref=e70]: mfiv202602130001
+            - generic [ref=e71]:
+              - generic [ref=e72]: 空间ID
+              - generic [ref=e73]: a1c747bb-8dd2-4e1d-813e-d16416d989cf
+            - generic [ref=e74]:
+              - generic [ref=e75]: 权限主体数
+              - generic [ref=e76]: "0"
+        - generic [ref=e77]:
+          - heading "所属组织树" [level=3] [ref=e79]
+          - paragraph [ref=e81]: 该用户未关联组织结构
