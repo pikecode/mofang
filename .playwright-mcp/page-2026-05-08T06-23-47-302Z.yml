@@ -1,0 +1,33 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - heading "魔方网表权限查看器" [level=1] [ref=e6]
+    - paragraph [ref=e7]: 查询指定账号在当前空间的所有对象权限设置信息
+  - generic [ref=e8]:
+    - heading "鉴权状态" [level=3] [ref=e10]:
+      - img [ref=e11]
+      - text: 鉴权状态
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - text: "模式:"
+          - generic [ref=e18]: TOKEN鉴权
+        - generic [ref=e19]:
+          - text: "TOKEN:"
+          - generic [ref=e20]: 未获取
+        - generic [ref=e21]:
+          - text: "RefreshToken:"
+          - generic [ref=e22]: 无
+      - generic [ref=e24]:
+        - button "测试TOKEN获取" [ref=e25] [cursor=pointer]:
+          - img
+          - text: 测试TOKEN获取
+        - button "清除TOKEN" [ref=e26] [cursor=pointer]
+  - generic [ref=e27]:
+    - generic [ref=e28]:
+      - heading "查询用户权限" [level=3] [ref=e29]:
+        - img [ref=e30]
+        - text: 查询用户权限
+      - paragraph [ref=e33]: 输入用户登录账号，查询该用户在当前空间的所有权限
+    - generic [ref=e35]:
+      - textbox "请输入用户登录账号" [ref=e36]
+      - button "查询" [disabled]

@@ -1,0 +1,7 @@
+{
+  "tool_name": "WebFetch",
+  "tool_input_preview": "{\"url\":\"http://demo.mf999.com/magicflu/s/a1c747bb-8dd2-4e1d-813e-d16416d989cf/authorities/feed?bq=(digitalid,eq,admin)&start=0&limit=-1\",\"prompt\":\"提取魔方网表权限相关的API接口调用示例，特别是 authorities/feed 接口的实际请求URL和...",
+  "error": "Unable to verify if domain demo.mf999.com is safe to fetch. This may be due to network restrictions or enterprise security policies blocking claude.ai.",
+  "timestamp": "2026-05-09T08:14:13.666Z",
+  "retry_count": 1
+}

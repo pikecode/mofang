@@ -1,0 +1,2 @@
+[     497ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/chunk-PJEEZAML.js?v=615fddf6:21550
+[     498ms] [LOG] [Auth] 配置加载: {enabled: true, username: 已配置, password: 已配置} @ http://localhost:3000/src/api/auth.ts:8

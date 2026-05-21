@@ -1,0 +1,5 @@
+[     100ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://192.168.1.37:3000/node_modules/.vite/deps/chunk-PJEEZAML.js?v=615fddf6:21550
+[     102ms] [LOG] [Auth] 配置加载: {enabled: true, username: 已配置, password: 已配置} @ http://192.168.1.37:3000/src/api/auth.ts:8
+[  171461ms] [LOG] [Auth] acquireToken 被调用, enabled: true @ http://192.168.1.37:3000/src/api/auth.ts:70
+[  171461ms] [LOG] [Auth] 尝试使用用户名密码获取TOKEN @ http://192.168.1.37:3000/src/api/auth.ts:88
+[  171729ms] [LOG] [Auth] TOKEN获取成功 @ http://192.168.1.37:3000/src/api/auth.ts:92

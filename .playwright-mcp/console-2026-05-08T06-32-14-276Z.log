@@ -1,0 +1,11 @@
+[      77ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://192.168.1.37:3000/node_modules/.vite/deps/chunk-PJEEZAML.js?v=615fddf6:21550
+[      79ms] [LOG] [Auth] 配置加载: {enabled: true, username: 已配置, password: 已配置} @ http://192.168.1.37:3000/src/api/auth.ts:8
+[  311627ms] [LOG] [vite] server connection lost. Polling for restart... @ http://192.168.1.37:3000/@vite/client:559
+[  311628ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.37:3000/:0
+[  312861ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://192.168.1.37:3000/node_modules/.vite/deps/chunk-PJEEZAML.js?v=615fddf6:21550
+[  312862ms] [LOG] [Auth] 配置加载: {enabled: true, username: 已配置, password: 已配置} @ http://192.168.1.37:3000/src/api/auth.ts:8
+[  336872ms] [LOG] [vite] server connection lost. Polling for restart... @ http://192.168.1.37:3000/@vite/client:559
+[  336873ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.37:3000/:0
+[  337876ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://192.168.1.37:3000/:0
+[  339391ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://192.168.1.37:3000/node_modules/.vite/deps/chunk-PJEEZAML.js?v=615fddf6:21550
+[  339391ms] [LOG] [Auth] 配置加载: {enabled: true, username: 已配置, password: 已配置} @ http://192.168.1.37:3000/src/api/auth.ts:8
