@@ -72,7 +72,7 @@ function App() {
             objectType: getItemTypeName(itemTypeId),
             objectTypeId: itemTypeId,
             scope: 'class',
-            objectName: acl.itemParentName || acl.itemParentId || '全部',
+            objectName: acl.itemTypeValueName || acl.itemParentName || acl.itemParentId || '全部',
             objectId: acl.itemTypeValue,
             parentName: acl.itemParentName,
             parentId: acl.itemParentId,
