@@ -33,7 +33,7 @@ interface UnifiedPermissionRow {
   objectId?: string
   parentName?: string
   parentId?: string
-  permissionName: string
+  permissions: string[]
   authorityNames: string[]
   authorityIds: string[]
 }
@@ -51,14 +51,14 @@ function App() {
 
   const { summary, loading, error, queryPermission } = usePermissionQuery()
 
-  // 构建统一权限列表
+  // 构建统一权限列表：一个对象一行，不按操作展开
   const unifiedRows = useMemo<UnifiedPermissionRow[]>(() => {
     if (!summary) return []
 
     const rows: UnifiedPermissionRow[] = []
     let rowId = 0
 
-    // 1. 处理对象类权限（展开每个权限操作）
+    // 1. 处理对象类权限（每条ACL一行）
     summary.itemTypeAcls.forEach((acls, itemTypeId) => {
       const actionGroups = getActionGroupsByScope(summary.actionGroups, itemTypeId, 0)
       acls.forEach((acl) => {
@@ -66,25 +66,23 @@ function App() {
         const authNames = (acl.authorityIds || [])
           .map((id) => summary.authorities.find((a) => a.authId === id)?.name || id)
 
-        permissions.forEach((permName) => {
-          rows.push({
-            id: `class-${rowId++}`,
-            objectType: getItemTypeName(itemTypeId),
-            objectTypeId: itemTypeId,
-            scope: 'class',
-            objectName: acl.itemTypeValueName || acl.itemParentName || acl.itemParentId || '全部',
-            objectId: acl.itemTypeValue,
-            parentName: acl.itemParentName,
-            parentId: acl.itemParentId,
-            permissionName: permName,
-            authorityNames: authNames,
-            authorityIds: acl.authorityIds || [],
-          })
+        rows.push({
+          id: `class-${rowId++}`,
+          objectType: getItemTypeName(itemTypeId),
+          objectTypeId: itemTypeId,
+          scope: 'class',
+          objectName: acl.itemParentName || acl.itemTypeValueName || acl.itemParentId || acl.itemTypeValue || '全部',
+          objectId: acl.itemTypeValue,
+          parentName: acl.itemParentName,
+          parentId: acl.itemParentId,
+          permissions,
+          authorityNames: authNames,
+          authorityIds: acl.authorityIds || [],
         })
       })
     })
 
-    // 2. 处理实例级权限（展开每个权限操作）
+    // 2. 处理实例级权限（每个对象一行）
     summary.itemPermissionGroups.forEach((group) => {
       const actionGroups = getActionGroupsByScope(summary.actionGroups, group.itemTypeId, 1)
       group.items.forEach((item) => {
@@ -92,18 +90,16 @@ function App() {
         const authNames = (item.authorityIds || [])
           .map((id) => summary.authorities.find((a) => a.authId === id)?.name || id)
 
-        permissions.forEach((permName) => {
-          rows.push({
-            id: `inst-${rowId++}`,
-            objectType: group.itemTypeName,
-            objectTypeId: group.itemTypeId,
-            scope: 'instance',
-            objectName: item.itemName || item.itemId,
-            objectId: item.itemId,
-            permissionName: permName,
-            authorityNames: authNames,
-            authorityIds: item.authorityIds || [],
-          })
+        rows.push({
+          id: `inst-${rowId++}`,
+          objectType: group.itemTypeName,
+          objectTypeId: group.itemTypeId,
+          scope: 'instance',
+          objectName: item.itemName || item.itemId,
+          objectId: item.itemId,
+          permissions,
+          authorityNames: authNames,
+          authorityIds: item.authorityIds || [],
         })
       })
     })
@@ -115,7 +111,7 @@ function App() {
   const filteredRows = useMemo(() => {
     return unifiedRows.filter((row) => {
       if (filterObjType && row.objectTypeId.toString() !== filterObjType) return false
-      if (filterPermission && row.permissionName !== filterPermission) return false
+      if (filterPermission && !row.permissions.includes(filterPermission)) return false
       if (filterAuthType && !row.authorityIds.some((id) => summary?.authorities.find((a) => a.authId === id)?.typeId.toString() === filterAuthType)) return false
       if (search) {
         const q = search.toLowerCase()
@@ -138,23 +134,40 @@ function App() {
   const stats = useMemo(() => {
     if (!summary) return { objectCount: 0, permissionCount: 0, authorityCount: 0 }
 
-    // 对象总数 = 类级权限条目数 + 实例级权限条目数
-    let classObjectCount = 0
+    // 对象总数 = 不重复的对象数
+    const objectIds = new Set<string>()
     summary.itemTypeAcls.forEach((acls) => {
-      classObjectCount += acls.length
+      acls.forEach((acl) => {
+        objectIds.add(`${acl.itemTypeId}:${acl.itemParentId || ''}:${acl.itemTypeValue || ''}`)
+      })
+    })
+    summary.itemPermissionGroups.forEach((g) => {
+      g.items.forEach((item) => {
+        objectIds.add(`${g.itemTypeId}:${item.itemId}`)
+      })
     })
 
-    let instanceObjectCount = 0
-    summary.itemPermissionGroups.forEach((g) => {
-      instanceObjectCount += g.items.length
+    // 权限总数 = 所有权限操作总数（展开后）
+    let permissionTotal = 0
+    summary.itemTypeAcls.forEach((acls, itemTypeId) => {
+      const actionGroups = getActionGroupsByScope(summary.actionGroups, itemTypeId, 0)
+      acls.forEach((acl) => {
+        permissionTotal += parseAclPermissions(acl.acl, actionGroups).length
+      })
+    })
+    summary.itemPermissionGroups.forEach((group) => {
+      const actionGroups = getActionGroupsByScope(summary.actionGroups, group.itemTypeId, 1)
+      group.items.forEach((item) => {
+        permissionTotal += parseAclPermissions(item.acl, actionGroups).length
+      })
     })
 
     return {
-      objectCount: classObjectCount + instanceObjectCount,
-      permissionCount: unifiedRows.length, // 对象×操作对数
+      objectCount: objectIds.size,
+      permissionCount: permissionTotal,
       authorityCount: summary.authorities.length,
     }
-  }, [summary, unifiedRows])
+  }, [summary])
 
   // 筛选选项
   const objTypeOptions = useMemo(() => {
@@ -167,7 +180,7 @@ function App() {
 
   const permissionOptions = useMemo(() => {
     const names = new Set<string>()
-    unifiedRows.forEach((r) => names.add(r.permissionName))
+    unifiedRows.forEach((r) => r.permissions.forEach((p) => names.add(p)))
     return Array.from(names)
   }, [unifiedRows])
 
@@ -285,7 +298,7 @@ function App() {
                   </div>
                 </div>
                 <div className="mt-2 text-3xl font-bold">{stats.permissionCount}</div>
-                <div className="text-xs text-muted-foreground">已命中的 (对象×操作) 对数</div>
+                <div className="text-xs text-muted-foreground">对象权限条目总数</div>
               </div>
               <div className="rounded-lg border bg-card p-4">
                 <div className="flex items-center justify-between">
@@ -346,14 +359,14 @@ function App() {
               <div className="rounded-lg border bg-card">
                 <div className="border-b px-4 py-3 text-sm text-muted-foreground flex justify-between items-center">
                   <span>权限视图：命中 {filteredRows.length} 行</span>
-                  <span className="text-xs">每行 = 一个对象 × 其所有被授予的操作</span>
+                  <span className="text-xs">每行 = 一个对象及其所有被授予的操作</span>
                 </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-32">对象类型</TableHead>
                       <TableHead>对象名称</TableHead>
-                      <TableHead className="w-32">权限</TableHead>
+                      <TableHead className="w-64">权限</TableHead>
                       <TableHead className="w-40">来源主体</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -387,7 +400,15 @@ function App() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary" className="text-xs">{row.permissionName}</Badge>
+                            <div className="flex flex-wrap gap-1">
+                              {row.permissions.length > 0 ? (
+                                row.permissions.map((p) => (
+                                  <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
+                                ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground">无权限</span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {row.authorityNames.slice(0, 2).join(', ') || '-'}
@@ -446,24 +467,42 @@ function App() {
               <div className="space-y-4">
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      当前用户身份
+                    <CardTitle className="text-sm flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        当前用户身份
+                      </span>
+                      <span className="text-xs text-muted-foreground font-normal">共 {summary.authorities.length}</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">用户身份</span>
-                      <span>{summary.authorities.filter((a) => a.typeId === 2).length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">所在用户组</span>
-                      <span>{summary.authorities.filter((a) => a.typeId === 1).length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">系统保留组</span>
-                      <span>{summary.authorities.filter((a) => a.typeId === 5).length}</span>
-                    </div>
+                  <CardContent className="space-y-4 text-sm">
+                    {[
+                      { typeIds: [2], label: '用户身份', icon: '👤' },
+                      { typeIds: [1], label: '所在用户组', icon: '👥' },
+                      { typeIds: [4, 7, 9, 10], label: '系统保留组', icon: '⚙️' },
+                      { typeIds: [5], label: '已登录用户(隐式)', icon: '🔑' },
+                      { typeIds: [3], label: '未登录用户', icon: '🚫' },
+                      { typeIds: [6], label: '创建人', icon: '✏️' },
+                      { typeIds: [8], label: '组织结构节点', icon: '🏢' },
+                    ].map(({ typeIds, label, icon }) => {
+                      const items = summary.authorities.filter((a) => typeIds.includes(a.typeId))
+                      if (items.length === 0) return null
+                      return (
+                        <div key={label}>
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <span className="text-xs">{icon}</span>
+                            <span className="font-medium text-xs">{label} - {items.length}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {items.map((a) => (
+                              <Badge key={a.authId} variant="secondary" className="text-xs font-normal">
+                                {a.name || a.authId}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </CardContent>
                 </Card>
 
