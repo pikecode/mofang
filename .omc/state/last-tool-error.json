@@ -1,7 +1,7 @@
 {
-  "tool_name": "mcp__playwright__browser_take_screenshot",
-  "tool_input_preview": "{\"type\":\"png\",\"filename\":\"test-names.png\"}",
-  "error": "### Error\nTimeoutError: browserBackend.callTool: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m",
-  "timestamp": "2026-05-22T03:28:37.919Z",
+  "tool_name": "mcp__playwright__browser_snapshot",
+  "tool_input_preview": "{}",
+  "error": "### Error\nError: Browser is already in use for /Users/peakom/Library/Caches/ms-playwright/mcp-chrome-d8f947b, use --isolated to run multiple instances of the same browser",
+  "timestamp": "2026-05-22T05:20:42.279Z",
   "retry_count": 1
 }
