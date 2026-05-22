@@ -152,20 +152,20 @@
   "hotPaths": [
     {
       "path": "src/App.tsx",
-      "accessCount": 121,
-      "lastAccessed": 1779427647403,
+      "accessCount": 140,
+      "lastAccessed": 1779432344339,
       "type": "file"
     },
     {
       "path": "src/hooks/usePermissionQuery.ts",
-      "accessCount": 51,
-      "lastAccessed": 1779419990816,
+      "accessCount": 54,
+      "lastAccessed": 1779431697963,
       "type": "file"
     },
     {
       "path": "src/api/permission.ts",
-      "accessCount": 44,
-      "lastAccessed": 1779419782209,
+      "accessCount": 45,
+      "lastAccessed": 1779427976116,
       "type": "file"
     },
     {
@@ -182,26 +182,26 @@
     },
     {
       "path": "src/api/auth.ts",
-      "accessCount": 9,
-      "lastAccessed": 1779363229720,
+      "accessCount": 10,
+      "lastAccessed": 1779430604020,
       "type": "file"
     },
     {
       "path": "docs/考核任务.md",
-      "accessCount": 5,
-      "lastAccessed": 1779361337660,
+      "accessCount": 7,
+      "lastAccessed": 1779428305453,
+      "type": "file"
+    },
+    {
+      "path": ".env",
+      "accessCount": 4,
+      "lastAccessed": 1779430725752,
       "type": "file"
     },
     {
       "path": "src/index.css",
       "accessCount": 3,
       "lastAccessed": 1779350295362,
-      "type": "file"
-    },
-    {
-      "path": ".env",
-      "accessCount": 3,
-      "lastAccessed": 1779364613000,
       "type": "file"
     },
     {

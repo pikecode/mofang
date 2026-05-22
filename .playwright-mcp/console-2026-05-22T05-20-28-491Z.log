@@ -1,1 +1,6 @@
 [     106ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3002/node_modules/.vite/deps/chunk-PJEEZAML.js?v=35dc07d8:21550
+[ 2036157ms] [ERROR] Warning: Each child in a list should have a unique "key" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s 
+
+Check the render method of `App`.  
+    at option
+    at App (http://localhost:3002/src/App.tsx?t=1779429264417:43:33) @ http://localhost:3002/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=35dc07d8:63
