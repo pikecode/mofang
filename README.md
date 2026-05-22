@@ -55,7 +55,7 @@ npm run dev
 访问地址：
 ```
 http://localhost:3000/?spaceId=yourSpaceId
-http://localhost:3000/?spaceId=a1c747bb-8dd2-4e1d-813e-d16416d989cf
+http://localhost:3000/?spaceId=aada6708-898a-4eb2-a24a-3ac55c9a24f3
 ```
 
 ### 生产构建
@@ -141,11 +141,11 @@ VITE_AUTH_PASSWORD=yourPassword
 server: {
   proxy: {
     '/service': {
-      target: 'http://demo.mf999.com/magicflu',
+      target: 'http://appdev.com.magicflu.com:16199',
       changeOrigin: true,
     },
     '/jwt': {
-      target: 'http://demo.mf999.com/magicflu',
+      target: 'http://appdev.com.magicflu.com:16199',
       changeOrigin: true,
     },
   },

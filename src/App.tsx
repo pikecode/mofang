@@ -11,19 +11,65 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { usePermissionQuery, getAuthorityTypeName, getItemTypeName, parseAclPermissions } from '@/hooks/usePermissionQuery'
-import { Loader2, Search, Settings, Users, FileText, Layers, Target } from 'lucide-react'
+import { getSpaceId } from '@/api/permission'
+import {
+  usePermissionQuery,
+  getActionGroupsByScope,
+  getAuthorityTypeName,
+  getItemTypeName,
+  parseAclPermissions,
+} from '@/hooks/usePermissionQuery'
+import { Loader2, Search, Settings, Users, FileText, Layers, Target, Shield, Info, UserCircle, Building2, UserCog, UserMinus, Crown, UsersRound } from 'lucide-react'
 
 type TabType = 'itemPermissions' | 'itemTypePermissions' | 'authorities'
 
+const TAB_META: Record<TabType, { label: string; desc: string }> = {
+  itemPermissions: {
+    label: '实例级对象权限',
+    desc: '针对某一个具体对象的授权，例如某张表单、某个分析项目、某个工作簿。',
+  },
+  itemTypePermissions: {
+    label: '对象类/范围权限',
+    desc: '针对一类资源或某个范围的授权，例如表单类、字段、导航树节点、问卷记录。',
+  },
+  authorities: {
+    label: '权限来源主体',
+    desc: '本次查询命中的用户、用户组、组织结构节点、已登录用户等权限来源。',
+  },
+}
+
+// 权限主体类型图标映射
+function getAuthorityIcon(typeId: number) {
+  switch (typeId) {
+    case 1: return UsersRound // 用户组
+    case 2: return UserCircle // 用户
+    case 3: return UserMinus // 未登录用户
+    case 4: return Shield // 空间管理员
+    case 5: return UserCog // 已登录用户
+    case 6: return Crown // 创建人
+    case 7: return UserCog // 代管理员
+    case 8: return Building2 // 组织结构节点
+    case 9: return Shield // 审计员
+    case 10: return Shield // 流程管理员
+    default: return Users
+  }
+}
+
+const PAGE_SIZE = 20
+
 function App() {
-  const [spaceId, setSpaceId] = useState('')
+  const [spaceId, setSpaceId] = useState(() => getSpaceId())
   const [digitalId, setDigitalId] = useState('')
   const [activeTab, setActiveTab] = useState<TabType>('itemPermissions')
   const [search, setSearch] = useState('')
   const [filterItemType, setFilterItemType] = useState('')
+  const [filterItemTypeAcl, setFilterItemTypeAcl] = useState('')
+  const [filterItemTypeAclSearch, setFilterItemTypeAclSearch] = useState('')
   const [filterAuthType, setFilterAuthType] = useState('')
+  const [itemTypeAclPage, setItemTypeAclPage] = useState(1)
+  const [itemPermissionPage, setItemPermissionPage] = useState(1)
   const { summary, loading, error, queryPermission } = usePermissionQuery()
+
 
   const handleQuery = () => {
     if (spaceId.trim() && digitalId.trim()) {
@@ -34,7 +80,11 @@ function App() {
   const handleReset = () => {
     setSearch('')
     setFilterItemType('')
+    setFilterItemTypeAcl('')
+    setFilterItemTypeAclSearch('')
     setFilterAuthType('')
+    setItemTypeAclPage(1)
+    setItemPermissionPage(1)
   }
 
   // 对象权限扁平化（带筛选）
@@ -42,6 +92,7 @@ function App() {
     group.items
       .filter((item) => {
         if (filterItemType && group.itemTypeId.toString() !== filterItemType) return false
+        if (filterAuthType && !item.authorityIds?.some((id) => summary.authorities.find((a) => a.authId === id)?.typeId.toString() === filterAuthType)) return false
         if (search && !item.itemName.toLowerCase().includes(search.toLowerCase()) && !item.itemId.toLowerCase().includes(search.toLowerCase())) return false
         return true
       })
@@ -51,6 +102,10 @@ function App() {
         itemTypeId: group.itemTypeId,
       }))
   ) || []
+
+  // 对象权限分页
+  const itemPermissionTotalPages = Math.ceil(flatItemPermissions.length / PAGE_SIZE)
+  const itemPermissionPagedData = flatItemPermissions.slice((itemPermissionPage - 1) * PAGE_SIZE, itemPermissionPage * PAGE_SIZE)
 
   // 统计
   const stats = summary?.stats || { authorityCount: 0, itemPermissionCount: 0, itemTypePermissionCount: 0 }
@@ -73,6 +128,51 @@ function App() {
   const itemTypeOptions = summary?.itemPermissionGroups
     ? summary.itemPermissionGroups.map((g) => ({ id: g.itemTypeId, name: g.itemTypeName }))
     : []
+
+  // 对象类权限类型（用于筛选下拉）
+  const itemTypeAclOptions = summary?.itemTypeAcls
+    ? Array.from(summary.itemTypeAcls.keys()).map((id) => ({ id, name: getItemTypeName(id) }))
+    : []
+
+  // 对象类权限分页数据
+  const itemTypeAclRows = summary?.itemTypeAcls
+    ? Array.from(summary.itemTypeAcls.entries())
+        .filter(([itemTypeId]) => !filterItemTypeAcl || itemTypeId.toString() === filterItemTypeAcl)
+        .filter(([, acls]) => {
+          if (!filterItemTypeAclSearch) return true
+          const q = filterItemTypeAclSearch.toLowerCase()
+          return acls.some((acl) =>
+            (acl.itemParentId || '').toLowerCase().includes(q) ||
+            (acl.itemTypeValue || '').toLowerCase().includes(q)
+          )
+        })
+        .flatMap(([itemTypeId, acls]) =>
+          acls.map((acl, aclIdx) => {
+            const actionGroupList = getActionGroupsByScope(summary.actionGroups, itemTypeId, 0)
+            const permissions = parseAclPermissions(acl.acl, actionGroupList)
+            const authNames = (acl.authorityIds || [])
+              .map((id) => summary.authorities.find((a) => a.authId === id))
+              .filter(Boolean)
+              .map((a) => a!.name || a!.authId)
+              .slice(0, 2)
+            const extraCount = (acl.authorityIds || []).length - authNames.length
+            return {
+              key: `${itemTypeId}-${aclIdx}`,
+              itemTypeId,
+              itemParentId: acl.itemParentId,
+              itemParentName: acl.itemParentName,
+              itemTypeValue: acl.itemTypeValue,
+              itemTypeValueName: acl.itemTypeValueName,
+              permissions,
+              authNames,
+              extraCount,
+            }
+          })
+        )
+    : []
+
+  const itemTypeAclTotalPages = Math.ceil(itemTypeAclRows.length / PAGE_SIZE)
+  const itemTypeAclPagedData = itemTypeAclRows.slice((itemTypeAclPage - 1) * PAGE_SIZE, itemTypeAclPage * PAGE_SIZE)
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,7 +232,7 @@ function App() {
             </div>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            使用当前登录账号调用空间权限接口，会聚合用户 / 用户组 / 组织结构节点 / 节点所在用户组 / 系统保留组 / 已登录用户的权限设置。
+            使用当前会话调用空间权限接口，会聚合接口命中的用户 / 用户组 / 组织结构节点 / 节点所在用户组 / 已登录用户权限设置。
           </p>
         </div>
 
@@ -140,6 +240,23 @@ function App() {
         {error && (
           <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
             {error}
+          </div>
+        )}
+
+        {/* 空白引导状态 */}
+        {!summary && !loading && !error && (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-card/50 py-20 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+              <Shield className="h-8 w-8 text-primary/60" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">RBAC 权限查看器</h3>
+            <p className="text-sm text-muted-foreground max-w-md mb-4">
+              输入用户的登录账号和空间ID，查询该用户在指定空间内的所有权限配置，包括权限主体、对象权限和对象类权限。
+            </p>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-4 py-3 max-w-lg">
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>系统会自动聚合接口明确返回的用户、用户组、组织结构节点等多个维度的权限信息。</span>
+            </div>
           </div>
         )}
 
@@ -157,7 +274,7 @@ function App() {
               </div>
               <div className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">对象权限</div>
+                  <div className="text-sm text-muted-foreground">实例级对象权限</div>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
                     <FileText className="h-4 w-4" />
                   </div>
@@ -166,7 +283,7 @@ function App() {
               </div>
               <div className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">对象类权限</div>
+                  <div className="text-sm text-muted-foreground">对象类/范围权限</div>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
                     <Layers className="h-4 w-4" />
                   </div>
@@ -175,15 +292,32 @@ function App() {
               </div>
               <div className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">命中主体数</div>
+                  <div className="text-sm text-muted-foreground">可筛选对象类型</div>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
                     <Target className="h-4 w-4" />
                   </div>
                 </div>
-                <div className="mt-2 text-3xl font-bold">{stats.authorityCount}</div>
+                <div className="mt-2 text-3xl font-bold">{itemTypeOptions.length}</div>
               </div>
             </div>
           )}
+
+        {summary && (
+          <div className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-3">
+            <div>
+              <div className="mb-1 text-sm font-medium">{TAB_META.itemTypePermissions.label}</div>
+              <p className="text-xs leading-5 text-muted-foreground">{TAB_META.itemTypePermissions.desc}</p>
+            </div>
+            <div>
+              <div className="mb-1 text-sm font-medium">{TAB_META.itemPermissions.label}</div>
+              <p className="text-xs leading-5 text-muted-foreground">{TAB_META.itemPermissions.desc}</p>
+            </div>
+            <div>
+              <div className="mb-1 text-sm font-medium">{TAB_META.authorities.label}</div>
+              <p className="text-xs leading-5 text-muted-foreground">{TAB_META.authorities.desc}</p>
+            </div>
+          </div>
+        )}
 
         {/* 内容区域：左侧主体 + 右侧面板 */}
         {summary && (
@@ -193,9 +327,9 @@ function App() {
               {/* Tab 切换 */}
               <div className="flex gap-1 rounded-lg bg-muted p-1">
                 {([
-                  { key: 'itemPermissions' as const, label: '对象权限', count: stats.itemPermissionCount },
-                  { key: 'itemTypePermissions' as const, label: '对象类权限', count: stats.itemTypePermissionCount },
-                  { key: 'authorities' as const, label: '权限主体', count: stats.authorityCount },
+                  { key: 'itemTypePermissions' as const, label: TAB_META.itemTypePermissions.label, count: stats.itemTypePermissionCount },
+                  { key: 'itemPermissions' as const, label: TAB_META.itemPermissions.label, count: stats.itemPermissionCount },
+                  { key: 'authorities' as const, label: TAB_META.authorities.label, count: stats.authorityCount },
                 ]).map((tab) => (
                   <button
                     key={tab.key}
@@ -218,17 +352,20 @@ function App() {
                   <span className="text-sm font-medium">筛选：</span>
                   <select
                     value={filterItemType}
-                    onChange={(e) => setFilterItemType(e.target.value)}
+                    onChange={(e) => { setFilterItemType(e.target.value); setItemPermissionPage(1) }}
                     className="h-9 rounded-md border bg-background px-2 text-sm"
+                    disabled={itemTypeOptions.length === 0}
                   >
-                    <option value="">全部对象类型</option>
+                    <option value="">
+                      {itemTypeOptions.length === 0 ? '暂无实例级对象类型' : '对象类型：全部'}
+                    </option>
                     {itemTypeOptions.map((opt) => (
                       <option key={opt.id} value={opt.id}>{opt.name}</option>
                     ))}
                   </select>
                   <select
                     value={filterAuthType}
-                    onChange={(e) => setFilterAuthType(e.target.value)}
+                    onChange={(e) => { setFilterAuthType(e.target.value); setItemPermissionPage(1) }}
                     className="h-9 rounded-md border bg-background px-2 text-sm"
                   >
                     <option value="">全部权限主体类型</option>
@@ -239,7 +376,7 @@ function App() {
                   <Input
                     placeholder="搜索对象名称/ID"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => { setSearch(e.target.value); setItemPermissionPage(1) }}
                     className="h-9 w-48"
                   />
                   <Button variant="ghost" size="sm" onClick={handleReset}>重置</Button>
@@ -252,7 +389,7 @@ function App() {
                 {activeTab === 'itemPermissions' && (
                   <>
                     <div className="border-b px-4 py-3 text-sm text-muted-foreground">
-                      共 {flatItemPermissions.length} 条对象权限
+                      共 {flatItemPermissions.length} 条实例级对象权限
                     </div>
                     <Table>
                       <TableHeader>
@@ -261,20 +398,26 @@ function App() {
                           <TableHead>对象ID</TableHead>
                           <TableHead>对象名称</TableHead>
                           <TableHead>权限操作</TableHead>
+                          <TableHead className="w-[160px]">来源主体</TableHead>
                           <TableHead>对象类型</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {flatItemPermissions.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                              无匹配数据
+                            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                              <div className="space-y-1">
+                                <div className="font-medium text-foreground">没有实例级对象权限数据</div>
+                                <div className="text-xs">
+                                  这表示接口未返回针对具体对象的单独授权；请优先查看"对象类/范围权限"。
+                                </div>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ) : (
-                          flatItemPermissions.map((item, idx) => (
+                          itemPermissionPagedData.map((item, idx) => (
                             <TableRow key={`${item.itemTypeId}:${item.itemId}`}>
-                              <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                              <TableCell className="text-muted-foreground">{(itemPermissionPage - 1) * PAGE_SIZE + idx + 1}</TableCell>
                               <TableCell className="font-mono text-xs max-w-[200px] truncate">{item.itemId}</TableCell>
                               <TableCell className="font-medium max-w-[250px] truncate">{item.itemName}</TableCell>
                               <TableCell>
@@ -284,9 +427,13 @@ function App() {
                                       <Badge key={pidx} variant="secondary" className="text-xs">{perm}</Badge>
                                     ))
                                   ) : (
-                                    <span className="text-xs text-muted-foreground">无权限</span>
+                                    <span className="text-xs text-muted-foreground">无权限（操作模板未加载）</span>
                                   )}
                                 </div>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground truncate">
+                                {(item.authorityIds?.slice(0, 2).map((id) => summary?.authorities.find((a) => a.authId === id)?.name || id).join(', ') || '-')}
+                                {(item.authorityIds?.length || 0) > 2 && <span className="ml-1">+{(item.authorityIds?.length || 0) - 2}</span>}
                               </TableCell>
                               <TableCell className="text-xs text-muted-foreground">{item.itemTypeName}</TableCell>
                             </TableRow>
@@ -294,14 +441,72 @@ function App() {
                         )}
                       </TableBody>
                     </Table>
+                    {/* 分页 */}
+                    {flatItemPermissions.length > 0 && (
+                      <div className="flex items-center justify-between border-t px-4 py-3">
+                        <div className="text-sm text-muted-foreground">
+                          共 {flatItemPermissions.length} 条，第 {itemPermissionPage} / {itemPermissionTotalPages} 页
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setItemPermissionPage(1)}
+                            disabled={itemPermissionPage === 1}
+                            className="h-8 rounded-md border px-2 text-sm disabled:opacity-50"
+                          >
+                            首页
+                          </button>
+                          <button
+                            onClick={() => setItemPermissionPage(p => Math.max(1, p - 1))}
+                            disabled={itemPermissionPage === 1}
+                            className="h-8 rounded-md border px-3 text-sm disabled:opacity-50"
+                          >
+                            上一页
+                          </button>
+                          <span className="text-sm">{itemPermissionPage}</span>
+                          <button
+                            onClick={() => setItemPermissionPage(p => Math.min(itemPermissionTotalPages, p + 1))}
+                            disabled={itemPermissionPage === itemPermissionTotalPages}
+                            className="h-8 rounded-md border px-3 text-sm disabled:opacity-50"
+                          >
+                            下一页
+                          </button>
+                          <button
+                            onClick={() => setItemPermissionPage(itemPermissionTotalPages)}
+                            disabled={itemPermissionPage === itemPermissionTotalPages}
+                            className="h-8 rounded-md border px-2 text-sm disabled:opacity-50"
+                          >
+                            末页
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
                 {/* 对象类权限表格 */}
                 {activeTab === 'itemTypePermissions' && (
                   <>
-                    <div className="border-b px-4 py-3 text-sm text-muted-foreground">
-                      共 {stats.itemTypePermissionCount} 条对象类权限
+                    <div className="flex flex-wrap items-center gap-3 border-b p-3">
+                      <span className="text-sm font-medium">筛选：</span>
+                      <select
+                        value={filterItemTypeAcl}
+                        onChange={(e) => { setFilterItemTypeAcl(e.target.value); setItemTypeAclPage(1) }}
+                        className="h-8 rounded-md border bg-background px-2 text-sm"
+                      >
+                        <option value="">全部对象类型</option>
+                        {itemTypeAclOptions.map((opt) => (
+                          <option key={opt.id} value={opt.id}>{opt.name}</option>
+                        ))}
+                      </select>
+                      <Input
+                        placeholder="搜索父对象/值"
+                        value={filterItemTypeAclSearch}
+                        onChange={(e) => { setFilterItemTypeAclSearch(e.target.value); setItemTypeAclPage(1) }}
+                        className="h-8 w-40 text-xs"
+                      />
+                      <span className="ml-auto text-sm text-muted-foreground">
+                        共 {stats.itemTypePermissionCount} 条
+                      </span>
                     </div>
                     <Table>
                       <TableHeader>
@@ -310,49 +515,93 @@ function App() {
                           <TableHead>对象类型</TableHead>
                           <TableHead>父对象/值</TableHead>
                           <TableHead>权限</TableHead>
+                          <TableHead className="w-[160px]">来源主体</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {summary.itemTypeAcls.size === 0 ? (
+                        {itemTypeAclRows.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                              无对象类权限
+                            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                              <div className="space-y-1">
+                                <div className="font-medium text-foreground">没有对象类/范围权限数据</div>
+                                <div className="text-xs">如果权限主体有数据，说明这些主体当前没有返回可展示的类权限记录。</div>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ) : (
-                          Array.from(summary.itemTypeAcls.entries()).flatMap(([itemTypeId, acls], groupIdx) =>
-                            acls.map((acl, aclIdx) => {
-                              const actionGroupList = summary.actionGroups.get(itemTypeId) || []
-                              const permissions = parseAclPermissions(acl.acl, actionGroupList)
-                              const globalIdx = acls.slice(0, aclIdx + 1).reduce((sum) => sum + 1, groupIdx === 0 ? 0 : Array.from(summary.itemTypeAcls.values()).slice(0, groupIdx).reduce((s, arr) => s + arr.length, 0))
-                              return (
-                                <TableRow key={`${itemTypeId}-${aclIdx}`}>
-                                  <TableCell className="text-muted-foreground">{globalIdx + 1}</TableCell>
-                                  <TableCell>
-                                    <Badge variant="outline" className="text-xs">{getItemTypeName(itemTypeId)}</Badge>
-                                  </TableCell>
-                                  <TableCell className="font-mono text-xs max-w-[200px] truncate">
-                                    {acl.itemParentId || '-'}
-                                    {acl.itemTypeValue && ` / ${acl.itemTypeValue}`}
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex flex-wrap gap-1">
-                                      {permissions.length > 0 ? (
-                                        permissions.map((perm, pidx) => (
-                                          <Badge key={pidx} variant="secondary" className="text-xs">{perm}</Badge>
-                                        ))
-                                      ) : (
-                                        <span className="text-xs text-muted-foreground">无权限</span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              )
-                            })
-                          )
+                          itemTypeAclPagedData.map((row, idx) => (
+                            <TableRow key={row.key}>
+                              <TableCell className="text-muted-foreground">{(itemTypeAclPage - 1) * PAGE_SIZE + idx + 1}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">{getItemTypeName(row.itemTypeId)}</Badge>
+                              </TableCell>
+                              <TableCell className="text-xs max-w-[200px] truncate">
+                                {row.itemParentName || row.itemParentId || '-'}
+                                {row.itemTypeValue && (
+                                  <span className="text-muted-foreground">
+                                    {' / '}{row.itemTypeValueName || row.itemTypeValue}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-wrap gap-1">
+                                  {row.permissions.length > 0 ? (
+                                    row.permissions.map((perm, pidx) => (
+                                      <Badge key={pidx} variant="secondary" className="text-xs">{perm}</Badge>
+                                    ))
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">无权限（操作模板未加载）</span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground truncate">
+                                {row.authNames.join(', ') || '-'}
+                                {row.extraCount > 0 && <span className="ml-1">+{row.extraCount}</span>}
+                              </TableCell>
+                            </TableRow>
+                          ))
                         )}
                       </TableBody>
                     </Table>
+                    {/* 分页 */}
+                    {itemTypeAclRows.length > 0 && (
+                      <div className="flex items-center justify-between border-t px-4 py-3">
+                        <div className="text-sm text-muted-foreground">
+                          共 {itemTypeAclRows.length} 条，第 {itemTypeAclPage} / {itemTypeAclTotalPages} 页
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setItemTypeAclPage(1)}
+                            disabled={itemTypeAclPage === 1}
+                            className="h-8 rounded-md border px-2 text-sm disabled:opacity-50"
+                          >
+                            首页
+                          </button>
+                          <button
+                            onClick={() => setItemTypeAclPage(p => Math.max(1, p - 1))}
+                            disabled={itemTypeAclPage === 1}
+                            className="h-8 rounded-md border px-3 text-sm disabled:opacity-50"
+                          >
+                            上一页
+                          </button>
+                          <span className="text-sm">{itemTypeAclPage}</span>
+                          <button
+                            onClick={() => setItemTypeAclPage(p => Math.min(itemTypeAclTotalPages, p + 1))}
+                            disabled={itemTypeAclPage === itemTypeAclTotalPages}
+                            className="h-8 rounded-md border px-3 text-sm disabled:opacity-50"
+                          >
+                            下一页
+                          </button>
+                          <button
+                            onClick={() => setItemTypeAclPage(itemTypeAclTotalPages)}
+                            disabled={itemTypeAclPage === itemTypeAclTotalPages}
+                            className="h-8 rounded-md border px-2 text-sm disabled:opacity-50"
+                          >
+                            末页
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -371,29 +620,32 @@ function App() {
                           </div>
                         ) : (
                           <div className="divide-y">
-                            {Object.entries(groupedAuthorities).map(([typeId, group]) => (
-                              <div key={typeId}>
-                                <div className="flex items-center gap-2 bg-muted/30 px-4 py-2.5">
-                                  <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-primary">
-                                    <Users className="h-3 w-3" />
-                                  </div>
-                                  <span className="text-sm font-medium">{group.typeName}</span>
-                                  <Badge variant="secondary" className="text-xs px-1.5 py-0">{group.items.length}</Badge>
-                                </div>
-                                <div className="divide-y">
-                                  {group.items.map((auth, idx) => (
-                                    <div key={`${auth.authId}-${idx}`} className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/30">
-                                      <div className="w-12 text-sm text-muted-foreground shrink-0">{idx + 1}</div>
-                                      <div className="w-[200px] shrink-0 truncate font-mono text-xs text-foreground">{auth.authId}</div>
-                                      <div className="flex-1 min-w-0 truncate text-sm">{auth.name || <span className="text-muted-foreground">-</span>}</div>
-                                      <div className="w-[200px] shrink-0 truncate font-mono text-xs text-muted-foreground">
-                                        {auth.parentId || '-'}
-                                      </div>
+                            {Object.entries(groupedAuthorities).map(([typeId, group]) => {
+                              const IconComponent = getAuthorityIcon(parseInt(typeId))
+                              return (
+                                <div key={typeId}>
+                                  <div className="flex items-center gap-2 bg-muted/30 px-4 py-2.5">
+                                    <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-primary">
+                                      <IconComponent className="h-3 w-3" />
                                     </div>
-                                  ))}
+                                    <span className="text-sm font-medium">{group.typeName}</span>
+                                    <Badge variant="secondary" className="text-xs px-1.5 py-0">{group.items.length}</Badge>
+                                  </div>
+                                  <div className="divide-y">
+                                    {group.items.map((auth, idx) => (
+                                      <div key={`${auth.authId}-${idx}`} className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/30">
+                                        <div className="w-12 text-sm text-muted-foreground shrink-0">{idx + 1}</div>
+                                        <div className="w-[200px] shrink-0 truncate font-mono text-xs text-foreground">{auth.authId}</div>
+                                        <div className="flex-1 min-w-0 truncate text-sm">{auth.name || <span className="text-muted-foreground">-</span>}</div>
+                                        <div className="w-[200px] shrink-0 truncate font-mono text-xs text-muted-foreground">
+                                          {auth.parentId || '-'}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              )
+                            })}
                           </div>
                         )}
                       </>

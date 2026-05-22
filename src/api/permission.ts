@@ -1,12 +1,10 @@
 import type { Authority, ItemActionGroup, ItemTypeAcl, ItemAcl } from '@/types'
 import { authenticatedFetch } from './auth'
 
-// 开发模式走 proxy，生产模式走同源
-const isDev = import.meta.env.DEV
-const apiBase = isDev ? '/magicflu/service' : '/magicflu/service'
+const apiBase = '/magicflu/service'
 
 // 默认spaceId
-const DEFAULT_SPACE_ID = 'a1c747bb-8dd2-4e1d-813e-d16416d989cf'
+const DEFAULT_SPACE_ID = 'aada6708-898a-4eb2-a24a-3ac55c9a24f3'
 
 export function getSpaceId(): string {
   const urlParams = new URLSearchParams(window.location.search)
@@ -18,7 +16,12 @@ function parseXML(xmlText: string): Document {
   if (xmlText.trim().startsWith('<!DOCTYPE html>') || xmlText.trim().startsWith('<html')) {
     throw new Error('API返回HTML页面，请检查鉴权状态')
   }
-  return new DOMParser().parseFromString(xmlText, 'application/xml')
+  const doc = new DOMParser().parseFromString(xmlText, 'application/xml')
+  const parserError = doc.querySelector('parsererror')
+  if (parserError) {
+    throw new Error('API返回的XML格式无法解析')
+  }
+  return doc
 }
 
 // 从XML提取权限主体
@@ -80,21 +83,6 @@ export async function fetchOrgAuthorities(spaceId: string, digitalId: string): P
   return extractAuthorities(doc)
 }
 
-export async function fetchSystemGroupAuthorities(spaceId: string): Promise<Authority[]> {
-  const systemTypes = [4, 7, 9, 10]
-  const result: Authority[] = []
-
-  for (const typeId of systemTypes) {
-    try {
-      const auth = await fetchAuthorityByTypeId(spaceId, typeId)
-      if (auth) result.push(auth)
-    } catch {
-      // 忽略
-    }
-  }
-  return result
-}
-
 // ==================== 操作模板接口 ====================
 
 export async function fetchItemActionGroups(spaceId: string, itemTypeId: number): Promise<ItemActionGroup[]> {
@@ -131,12 +119,14 @@ export async function fetchItemTypeAcls(spaceId: string, authId: string): Promis
 
   entries.forEach((entry) => {
     const acl = entry.querySelector('content itemTypeAcl acl')?.textContent
+    const itemTypeId = entry.querySelector('content itemTypeAcl itemTypeId')?.textContent
     const itemParentId = entry.querySelector('content itemTypeAcl itemParentId')?.textContent
     const itemTypeValue = entry.querySelector('content itemTypeAcl itemTypeValue')?.textContent
 
     if (acl) {
       acls.push({
         acl,
+        itemTypeId: itemTypeId ? parseInt(itemTypeId) : undefined,
         itemParentId: itemParentId || undefined,
         itemTypeValue: itemTypeValue || undefined,
       })

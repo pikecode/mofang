@@ -22,8 +22,10 @@ export interface ItemActionGroup {
 // 对象类权限
 export interface ItemTypeAcl {
   acl: string
+  itemTypeId?: number
   itemParentId?: string
   itemTypeValue?: string
+  authorityIds?: string[]
 }
 
 // 对象权限
@@ -31,6 +33,7 @@ export interface ItemAcl {
   acl: string
   itemTypeId: number
   itemId: string
+  authorityIds?: string[]
 }
 
 // 对象基本信息

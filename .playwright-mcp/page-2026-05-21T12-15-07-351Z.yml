@@ -1,0 +1,123 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: 魔
+        - generic [ref=e8]: 魔方网表 · RBAC 权限查看器
+      - generic [ref=e9]:
+        - generic [ref=e34]: "空间ID: aada6708-898a-4eb2-a24a-3ac55c9a24f3"
+        - generic [ref=e35]: "查询账号: zhanggf"
+        - generic [ref=e11]: 👤
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: 登录账号 (digitalId)
+          - textbox "请输入用户登录账号" [ref=e17]: zhanggf
+        - generic [ref=e18]:
+          - generic [ref=e19]: 空间 ID (spaceId)
+          - textbox "请输入空间ID" [ref=e20]: aada6708-898a-4eb2-a24a-3ac55c9a24f3
+        - button "查询" [ref=e33] [cursor=pointer]:
+          - img
+          - text: 查询
+      - paragraph [ref=e22]: 使用当前会话调用空间权限接口，会聚合接口命中的用户 / 用户组 / 组织结构节点 / 节点所在用户组 / 已登录用户权限设置。
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: 权限主体
+          - img [ref=e41]
+        - generic [ref=e46]: "2"
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: 实例级对象权限
+          - img [ref=e51]
+        - generic [ref=e54]: "0"
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: 对象类/范围权限
+          - img [ref=e59]
+        - generic [ref=e63]: "122"
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]: 可筛选对象类型
+          - img [ref=e68]
+        - generic [ref=e72]: "0"
+    - generic [ref=e73]:
+      - generic [ref=e74]:
+        - generic [ref=e75]: 对象类/范围权限
+        - paragraph [ref=e76]: 针对一类资源或某个范围的授权，例如表单类、字段、导航树节点、问卷记录。
+      - generic [ref=e77]:
+        - generic [ref=e78]: 实例级对象权限
+        - paragraph [ref=e79]: 针对某一个具体对象的授权，例如某张表单、某个分析项目、某个工作簿。
+      - generic [ref=e80]:
+        - generic [ref=e81]: 权限来源主体
+        - paragraph [ref=e82]: 本次查询命中的用户、用户组、组织结构节点、已登录用户等权限来源。
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - generic [ref=e85]:
+          - button "对象类/范围权限· 122" [ref=e86] [cursor=pointer]:
+            - text: 对象类/范围权限
+            - generic [ref=e87]: · 122
+          - button "实例级对象权限· 0" [ref=e88] [cursor=pointer]:
+            - text: 实例级对象权限
+            - generic [ref=e89]: · 0
+          - button "权限来源主体· 2" [ref=e90] [cursor=pointer]:
+            - text: 权限来源主体
+            - generic [ref=e91]: · 2
+        - generic [ref=e92]:
+          - generic [ref=e93]: 筛选：
+          - combobox [disabled] [ref=e94]:
+            - option "暂无实例级对象类型" [selected]
+          - combobox [ref=e95]:
+            - option "全部权限主体类型" [selected]
+            - option "用户"
+            - option "已登录用户"
+          - textbox "搜索对象名称/ID" [ref=e96]
+          - button "重置" [ref=e97] [cursor=pointer]
+        - generic [ref=e98]:
+          - generic [ref=e99]: 共 0 条实例级对象权限
+          - table [ref=e101]:
+            - rowgroup [ref=e102]:
+              - row "序号 对象ID 对象名称 权限操作 对象类型" [ref=e103]:
+                - columnheader "序号" [ref=e104]
+                - columnheader "对象ID" [ref=e105]
+                - columnheader "对象名称" [ref=e106]
+                - columnheader "权限操作" [ref=e107]
+                - columnheader "对象类型" [ref=e108]
+            - rowgroup [ref=e109]:
+              - row "没有实例级对象权限数据 这表示接口未返回针对具体对象的单独授权；请优先查看“对象类/范围权限”。" [ref=e110]:
+                - cell "没有实例级对象权限数据 这表示接口未返回针对具体对象的单独授权；请优先查看“对象类/范围权限”。" [ref=e111]:
+                  - generic [ref=e112]:
+                    - generic [ref=e113]: 没有实例级对象权限数据
+                    - generic [ref=e114]: 这表示接口未返回针对具体对象的单独授权；请优先查看“对象类/范围权限”。
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - heading "当前用户会话" [level=3] [ref=e118]:
+            - text: 当前用户会话
+            - img [ref=e120]
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - generic [ref=e125]: 登录账号
+              - generic [ref=e126]: zhanggf
+            - generic [ref=e127]:
+              - generic [ref=e128]: 空间ID
+              - generic [ref=e129]: aada6708-898a-4eb2-a24a-3ac55c9a24f3
+            - generic [ref=e130]:
+              - generic [ref=e131]: 权限主体数
+              - generic [ref=e132]: "2"
+        - generic [ref=e133]:
+          - heading "所属组织树 0" [level=3] [ref=e135]:
+            - text: 所属组织树
+            - generic [ref=e137]: "0"
+          - generic [ref=e139]:
+            - img [ref=e141]
+            - paragraph [ref=e146]: 该用户未关联组织结构
+        - generic [ref=e147]:
+          - heading "主体类型分布" [level=3] [ref=e149]
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]: 用户
+              - generic [ref=e154]: "1"
+            - generic [ref=e155]:
+              - generic [ref=e156]: 已登录用户
+              - generic [ref=e157]: "1"

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779329046296,
+  "lastScanned": 1779418068871,
   "projectRoot": "/Users/peakom/works/mofang",
   "techStack": {
     "languages": [
@@ -73,7 +73,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 1,
-      "lastAccessed": 1779329046196,
+      "lastAccessed": 1779418068827,
       "keyFiles": [
         "index.html"
       ]
@@ -81,19 +81,21 @@
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
-      "fileCount": 3,
-      "lastAccessed": 1779329046197,
+      "fileCount": 7,
+      "lastAccessed": 1779418068828,
       "keyFiles": [
-        "考核任务.md",
-        "魔方网表TOKEN使用说明V1.1.pdf",
-        "魔方网表用户手册-v7.0.pdf"
+        "token使用说明.md",
+        "前端开发二阶段考核任务.md",
+        "实现文档.md",
+        "微信图片_20260511193749_20_6200.png",
+        "考核任务.md"
       ]
     },
     "src": {
       "path": "src",
       "purpose": "Source code",
       "fileCount": 4,
-      "lastAccessed": 1779329046197,
+      "lastAccessed": 1779418068848,
       "keyFiles": [
         "App.tsx",
         "index.css",
@@ -105,17 +107,17 @@
       "path": "dist/assets",
       "purpose": "Static assets",
       "fileCount": 2,
-      "lastAccessed": 1779329046197,
+      "lastAccessed": 1779418068850,
       "keyFiles": [
-        "index-BZDXnFS8.js",
-        "index-BrU1oTC0.css"
+        "index-BHpJ9Y5W.css",
+        "index-V0jk7_xQ.js"
       ]
     },
     "src/api": {
       "path": "src/api",
       "purpose": "API routes",
       "fileCount": 2,
-      "lastAccessed": 1779329046205,
+      "lastAccessed": 1779418068852,
       "keyFiles": [
         "auth.ts",
         "permission.ts"
@@ -125,14 +127,14 @@
       "path": "src/components",
       "purpose": "UI components",
       "fileCount": 0,
-      "lastAccessed": 1779329046246,
+      "lastAccessed": 1779418068854,
       "keyFiles": []
     },
     "src/lib": {
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 1,
-      "lastAccessed": 1779329046254,
+      "lastAccessed": 1779418068856,
       "keyFiles": [
         "utils.ts"
       ]
@@ -141,7 +143,7 @@
       "path": "src/types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1779329046259,
+      "lastAccessed": 1779418068859,
       "keyFiles": [
         "index.ts"
       ]
@@ -149,51 +151,57 @@
   },
   "hotPaths": [
     {
-      "path": "src/api/permission.ts",
-      "accessCount": 40,
-      "lastAccessed": 1779351789115,
-      "type": "file"
-    },
-    {
       "path": "src/App.tsx",
-      "accessCount": 29,
-      "lastAccessed": 1779351012563,
+      "accessCount": 106,
+      "lastAccessed": 1779423843409,
       "type": "file"
     },
     {
       "path": "src/hooks/usePermissionQuery.ts",
-      "accessCount": 24,
-      "lastAccessed": 1779351788715,
+      "accessCount": 51,
+      "lastAccessed": 1779419990816,
       "type": "file"
     },
     {
-      "path": "vite.config.ts",
-      "accessCount": 8,
-      "lastAccessed": 1779349665845,
-      "type": "file"
-    },
-    {
-      "path": "src/api/auth.ts",
-      "accessCount": 7,
-      "lastAccessed": 1779351789014,
-      "type": "file"
-    },
-    {
-      "path": "docs/考核任务.md",
-      "accessCount": 4,
-      "lastAccessed": 1779349707755,
+      "path": "src/api/permission.ts",
+      "accessCount": 44,
+      "lastAccessed": 1779419782209,
       "type": "file"
     },
     {
       "path": "src/types/index.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779350165146,
+      "accessCount": 11,
+      "lastAccessed": 1779419690637,
+      "type": "file"
+    },
+    {
+      "path": "vite.config.ts",
+      "accessCount": 11,
+      "lastAccessed": 1779421159204,
+      "type": "file"
+    },
+    {
+      "path": "src/api/auth.ts",
+      "accessCount": 9,
+      "lastAccessed": 1779363229720,
+      "type": "file"
+    },
+    {
+      "path": "docs/考核任务.md",
+      "accessCount": 5,
+      "lastAccessed": 1779361337660,
       "type": "file"
     },
     {
       "path": "src/index.css",
       "accessCount": 3,
       "lastAccessed": 1779350295362,
+      "type": "file"
+    },
+    {
+      "path": ".env",
+      "accessCount": 3,
+      "lastAccessed": 1779364613000,
       "type": "file"
     },
     {
@@ -230,12 +238,6 @@
       "path": "deploy.sh",
       "accessCount": 1,
       "lastAccessed": 1779331200306,
-      "type": "file"
-    },
-    {
-      "path": ".env",
-      "accessCount": 1,
-      "lastAccessed": 1779331200639,
       "type": "file"
     },
     {

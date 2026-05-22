@@ -1,0 +1,325 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: 魔
+        - generic [ref=e8]: 魔方网表 · RBAC 权限查看器
+      - generic [ref=e9]:
+        - generic [ref=e34]: "空间ID: aada6708-898a-4eb2-a24a-3ac55c9a24f3"
+        - generic [ref=e35]: "查询账号: zhanggf"
+        - generic [ref=e11]: 👤
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: 登录账号 (digitalId)
+          - textbox "请输入用户登录账号" [ref=e17]: zhanggf
+        - generic [ref=e18]:
+          - generic [ref=e19]: 空间 ID (spaceId)
+          - textbox "请输入空间ID" [ref=e20]: aada6708-898a-4eb2-a24a-3ac55c9a24f3
+        - button "查询" [ref=e33] [cursor=pointer]:
+          - img
+          - text: 查询
+      - paragraph [ref=e22]: 使用当前会话调用空间权限接口，会聚合接口命中的用户 / 用户组 / 组织结构节点 / 节点所在用户组 / 已登录用户权限设置。
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: 权限主体
+          - img [ref=e41]
+        - generic [ref=e46]: "2"
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: 实例级对象权限
+          - img [ref=e51]
+        - generic [ref=e54]: "0"
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]: 对象类/范围权限
+          - img [ref=e59]
+        - generic [ref=e63]: "122"
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]: 可筛选对象类型
+          - img [ref=e68]
+        - generic [ref=e72]: "0"
+    - generic [ref=e73]:
+      - generic [ref=e74]:
+        - generic [ref=e75]: 对象类/范围权限
+        - paragraph [ref=e76]: 针对一类资源或某个范围的授权，例如表单类、字段、导航树节点、问卷记录。
+      - generic [ref=e77]:
+        - generic [ref=e78]: 实例级对象权限
+        - paragraph [ref=e79]: 针对某一个具体对象的授权，例如某张表单、某个分析项目、某个工作簿。
+      - generic [ref=e80]:
+        - generic [ref=e81]: 权限来源主体
+        - paragraph [ref=e82]: 本次查询命中的用户、用户组、组织结构节点、已登录用户等权限来源。
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - generic [ref=e85]:
+          - button "对象类/范围权限· 122" [active] [ref=e86] [cursor=pointer]:
+            - text: 对象类/范围权限
+            - generic [ref=e87]: · 122
+          - button "实例级对象权限· 0" [ref=e88] [cursor=pointer]:
+            - text: 实例级对象权限
+            - generic [ref=e89]: · 0
+          - button "权限来源主体· 2" [ref=e90] [cursor=pointer]:
+            - text: 权限来源主体
+            - generic [ref=e91]: · 2
+        - generic [ref=e98]:
+          - generic [ref=e158]:
+            - generic [ref=e159]: 筛选：
+            - combobox [ref=e160]:
+              - option "全部对象类型" [selected]
+              - option "手动回写公式"
+              - option "记录"
+              - option "导航树及其节点"
+              - option "表单"
+            - textbox "搜索父对象/值" [ref=e161]
+            - generic [ref=e162]: 共 122 条
+          - table [ref=e164]:
+            - rowgroup [ref=e165]:
+              - row "序号 对象类型 父对象/值 权限 来源主体" [ref=e166]:
+                - columnheader "序号" [ref=e167]
+                - columnheader "对象类型" [ref=e168]
+                - columnheader "父对象/值" [ref=e169]
+                - columnheader "权限" [ref=e170]
+                - columnheader "来源主体" [ref=e171]
+            - rowgroup [ref=e172]:
+              - row "1 手动回写公式 OOS调查 / h4 无权限（操作模板未加载） 已登录用户" [ref=e173]:
+                - cell "1" [ref=e174]
+                - cell "手动回写公式" [ref=e175]:
+                  - generic [ref=e176]: 手动回写公式
+                - cell "OOS调查 / h4" [ref=e177]:
+                  - text: OOS调查
+                  - generic [ref=e178]: / h4
+                - cell "无权限（操作模板未加载）" [ref=e179]:
+                  - generic [ref=e181]: 无权限（操作模板未加载）
+                - cell "已登录用户" [ref=e182]
+              - row "2 手动回写公式 OOS调查子表 / h2 无权限（操作模板未加载） 已登录用户" [ref=e183]:
+                - cell "2" [ref=e184]
+                - cell "手动回写公式" [ref=e185]:
+                  - generic [ref=e186]: 手动回写公式
+                - cell "OOS调查子表 / h2" [ref=e187]:
+                  - text: OOS调查子表
+                  - generic [ref=e188]: / h2
+                - cell "无权限（操作模板未加载）" [ref=e189]:
+                  - generic [ref=e191]: 无权限（操作模板未加载）
+                - cell "已登录用户" [ref=e192]
+              - row "3 手动回写公式 OOS调查额外取样申请 / h0 执行 已登录用户" [ref=e193]:
+                - cell "3" [ref=e194]
+                - cell "手动回写公式" [ref=e195]:
+                  - generic [ref=e196]: 手动回写公式
+                - cell "OOS调查额外取样申请 / h0" [ref=e197]:
+                  - text: OOS调查额外取样申请
+                  - generic [ref=e198]: / h0
+                - cell "执行" [ref=e199]:
+                  - generic [ref=e201]: 执行
+                - cell "已登录用户" [ref=e202]
+              - row "4 手动回写公式 OOS调查额外取样申请 / h1 执行 已登录用户" [ref=e203]:
+                - cell "4" [ref=e204]
+                - cell "手动回写公式" [ref=e205]:
+                  - generic [ref=e206]: 手动回写公式
+                - cell "OOS调查额外取样申请 / h1" [ref=e207]:
+                  - text: OOS调查额外取样申请
+                  - generic [ref=e208]: / h1
+                - cell "执行" [ref=e209]:
+                  - generic [ref=e211]: 执行
+                - cell "已登录用户" [ref=e212]
+              - row "5 手动回写公式 OOS调查额外取样申请 / h2 执行 已登录用户" [ref=e213]:
+                - cell "5" [ref=e214]
+                - cell "手动回写公式" [ref=e215]:
+                  - generic [ref=e216]: 手动回写公式
+                - cell "OOS调查额外取样申请 / h2" [ref=e217]:
+                  - text: OOS调查额外取样申请
+                  - generic [ref=e218]: / h2
+                - cell "执行" [ref=e219]:
+                  - generic [ref=e221]: 执行
+                - cell "已登录用户" [ref=e222]
+              - row "6 手动回写公式 变更回顾修订申请 / h1 执行 已登录用户" [ref=e223]:
+                - cell "6" [ref=e224]
+                - cell "手动回写公式" [ref=e225]:
+                  - generic [ref=e226]: 手动回写公式
+                - cell "变更回顾修订申请 / h1" [ref=e227]:
+                  - text: 变更回顾修订申请
+                  - generic [ref=e228]: / h1
+                - cell "执行" [ref=e229]:
+                  - generic [ref=e231]: 执行
+                - cell "已登录用户" [ref=e232]
+              - row "7 手动回写公式 CAPA修订申请 / h0 执行 已登录用户" [ref=e233]:
+                - cell "7" [ref=e234]
+                - cell "手动回写公式" [ref=e235]:
+                  - generic [ref=e236]: 手动回写公式
+                - cell "CAPA修订申请 / h0" [ref=e237]:
+                  - text: CAPA修订申请
+                  - generic [ref=e238]: / h0
+                - cell "执行" [ref=e239]:
+                  - generic [ref=e241]: 执行
+                - cell "已登录用户" [ref=e242]
+              - row "8 手动回写公式 CAPA修订申请 / h3 执行 已登录用户" [ref=e243]:
+                - cell "8" [ref=e244]
+                - cell "手动回写公式" [ref=e245]:
+                  - generic [ref=e246]: 手动回写公式
+                - cell "CAPA修订申请 / h3" [ref=e247]:
+                  - text: CAPA修订申请
+                  - generic [ref=e248]: / h3
+                - cell "执行" [ref=e249]:
+                  - generic [ref=e251]: 执行
+                - cell "已登录用户" [ref=e252]
+              - row "9 手动回写公式 变更管理 / h0 执行 已登录用户" [ref=e253]:
+                - cell "9" [ref=e254]
+                - cell "手动回写公式" [ref=e255]:
+                  - generic [ref=e256]: 手动回写公式
+                - cell "变更管理 / h0" [ref=e257]:
+                  - text: 变更管理
+                  - generic [ref=e258]: / h0
+                - cell "执行" [ref=e259]:
+                  - generic [ref=e261]: 执行
+                - cell "已登录用户" [ref=e262]
+              - row "10 手动回写公式 OOS调查样品复检申请 / h0 执行 已登录用户" [ref=e263]:
+                - cell "10" [ref=e264]
+                - cell "手动回写公式" [ref=e265]:
+                  - generic [ref=e266]: 手动回写公式
+                - cell "OOS调查样品复检申请 / h0" [ref=e267]:
+                  - text: OOS调查样品复检申请
+                  - generic [ref=e268]: / h0
+                - cell "执行" [ref=e269]:
+                  - generic [ref=e271]: 执行
+                - cell "已登录用户" [ref=e272]
+              - row "11 手动回写公式 OOS调查样品复检申请 / h1 执行 已登录用户" [ref=e273]:
+                - cell "11" [ref=e274]
+                - cell "手动回写公式" [ref=e275]:
+                  - generic [ref=e276]: 手动回写公式
+                - cell "OOS调查样品复检申请 / h1" [ref=e277]:
+                  - text: OOS调查样品复检申请
+                  - generic [ref=e278]: / h1
+                - cell "执行" [ref=e279]:
+                  - generic [ref=e281]: 执行
+                - cell "已登录用户" [ref=e282]
+              - row "12 手动回写公式 OOS调查样品复检申请 / h2 执行 已登录用户" [ref=e283]:
+                - cell "12" [ref=e284]
+                - cell "手动回写公式" [ref=e285]:
+                  - generic [ref=e286]: 手动回写公式
+                - cell "OOS调查样品复检申请 / h2" [ref=e287]:
+                  - text: OOS调查样品复检申请
+                  - generic [ref=e288]: / h2
+                - cell "执行" [ref=e289]:
+                  - generic [ref=e291]: 执行
+                - cell "已登录用户" [ref=e292]
+              - row "13 手动回写公式 变更修订申请 / h1 执行 已登录用户" [ref=e293]:
+                - cell "13" [ref=e294]
+                - cell "手动回写公式" [ref=e295]:
+                  - generic [ref=e296]: 手动回写公式
+                - cell "变更修订申请 / h1" [ref=e297]:
+                  - text: 变更修订申请
+                  - generic [ref=e298]: / h1
+                - cell "执行" [ref=e299]:
+                  - generic [ref=e301]: 执行
+                - cell "已登录用户" [ref=e302]
+              - row "14 手动回写公式 待定变更事项更新 / h0 执行 已登录用户" [ref=e303]:
+                - cell "14" [ref=e304]
+                - cell "手动回写公式" [ref=e305]:
+                  - generic [ref=e306]: 手动回写公式
+                - cell "待定变更事项更新 / h0" [ref=e307]:
+                  - text: 待定变更事项更新
+                  - generic [ref=e308]: / h0
+                - cell "执行" [ref=e309]:
+                  - generic [ref=e311]: 执行
+                - cell "已登录用户" [ref=e312]
+              - row "15 手动回写公式 OOS调查 / h0 执行 已登录用户" [ref=e313]:
+                - cell "15" [ref=e314]
+                - cell "手动回写公式" [ref=e315]:
+                  - generic [ref=e316]: 手动回写公式
+                - cell "OOS调查 / h0" [ref=e317]:
+                  - text: OOS调查
+                  - generic [ref=e318]: / h0
+                - cell "执行" [ref=e319]:
+                  - generic [ref=e321]: 执行
+                - cell "已登录用户" [ref=e322]
+              - row "16 手动回写公式 OOS调查 / h1 执行 已登录用户" [ref=e323]:
+                - cell "16" [ref=e324]
+                - cell "手动回写公式" [ref=e325]:
+                  - generic [ref=e326]: 手动回写公式
+                - cell "OOS调查 / h1" [ref=e327]:
+                  - text: OOS调查
+                  - generic [ref=e328]: / h1
+                - cell "执行" [ref=e329]:
+                  - generic [ref=e331]: 执行
+                - cell "已登录用户" [ref=e332]
+              - row "17 手动回写公式 OOS调查 / h2 执行 已登录用户" [ref=e333]:
+                - cell "17" [ref=e334]
+                - cell "手动回写公式" [ref=e335]:
+                  - generic [ref=e336]: 手动回写公式
+                - cell "OOS调查 / h2" [ref=e337]:
+                  - text: OOS调查
+                  - generic [ref=e338]: / h2
+                - cell "执行" [ref=e339]:
+                  - generic [ref=e341]: 执行
+                - cell "已登录用户" [ref=e342]
+              - row "18 手动回写公式 OOS调查 / h3 执行 已登录用户" [ref=e343]:
+                - cell "18" [ref=e344]
+                - cell "手动回写公式" [ref=e345]:
+                  - generic [ref=e346]: 手动回写公式
+                - cell "OOS调查 / h3" [ref=e347]:
+                  - text: OOS调查
+                  - generic [ref=e348]: / h3
+                - cell "执行" [ref=e349]:
+                  - generic [ref=e351]: 执行
+                - cell "已登录用户" [ref=e352]
+              - row "19 手动回写公式 OOS调查 / h5 执行 已登录用户" [ref=e353]:
+                - cell "19" [ref=e354]
+                - cell "手动回写公式" [ref=e355]:
+                  - generic [ref=e356]: 手动回写公式
+                - cell "OOS调查 / h5" [ref=e357]:
+                  - text: OOS调查
+                  - generic [ref=e358]: / h5
+                - cell "执行" [ref=e359]:
+                  - generic [ref=e361]: 执行
+                - cell "已登录用户" [ref=e362]
+              - row "20 手动回写公式 OOS调查 / h6 执行 已登录用户" [ref=e363]:
+                - cell "20" [ref=e364]
+                - cell "手动回写公式" [ref=e365]:
+                  - generic [ref=e366]: 手动回写公式
+                - cell "OOS调查 / h6" [ref=e367]:
+                  - text: OOS调查
+                  - generic [ref=e368]: / h6
+                - cell "执行" [ref=e369]:
+                  - generic [ref=e371]: 执行
+                - cell "已登录用户" [ref=e372]
+          - generic [ref=e373]:
+            - generic [ref=e374]: 共 122 条，第 1 / 7 页
+            - generic [ref=e375]:
+              - button "首页" [disabled] [ref=e376]
+              - button "上一页" [disabled] [ref=e377]
+              - generic [ref=e378]: "1"
+              - button "下一页" [ref=e379] [cursor=pointer]
+              - button "末页" [ref=e380] [cursor=pointer]
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - heading "当前用户会话" [level=3] [ref=e118]:
+            - text: 当前用户会话
+            - img [ref=e120]
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - generic [ref=e125]: 登录账号
+              - generic [ref=e126]: zhanggf
+            - generic [ref=e127]:
+              - generic [ref=e128]: 空间ID
+              - generic [ref=e129]: aada6708-898a-4eb2-a24a-3ac55c9a24f3
+            - generic [ref=e130]:
+              - generic [ref=e131]: 权限主体数
+              - generic [ref=e132]: "2"
+        - generic [ref=e133]:
+          - heading "所属组织树 0" [level=3] [ref=e135]:
+            - text: 所属组织树
+            - generic [ref=e137]: "0"
+          - generic [ref=e139]:
+            - img [ref=e141]
+            - paragraph [ref=e146]: 该用户未关联组织结构
+        - generic [ref=e147]:
+          - heading "主体类型分布" [level=3] [ref=e149]
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]: 用户
+              - generic [ref=e154]: "1"
+            - generic [ref=e155]:
+              - generic [ref=e156]: 已登录用户
+              - generic [ref=e157]: "1"

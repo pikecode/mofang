@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
     proxy: {
       '/magicflu/service': {
-        target: 'http://demo.mf999.com',
+        target: 'http://appdev.com.magicflu.com:16199',
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
         },
       },
       '/magicflu/jwt': {
-        target: 'http://demo.mf999.com',
+        target: 'http://appdev.com.magicflu.com:16199',
         changeOrigin: true,
         secure: false,
       },

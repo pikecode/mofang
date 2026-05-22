@@ -1,0 +1,21 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: 魔
+        - generic [ref=e8]: 魔方网表 · RBAC 权限查看器
+      - generic [ref=e11]: 👤
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: 登录账号 (digitalId)
+          - textbox "请输入用户登录账号" [ref=e17]: zhanggf
+        - generic [ref=e18]:
+          - generic [ref=e19]: 空间 ID (spaceId)
+          - textbox "请输入空间ID" [ref=e20]: aada6708-898a-4eb2-a24a-3ac55c9a24f3
+        - generic [ref=e21]:
+          - button "查询" [disabled]:
+            - img
+            - text: 查询
+      - paragraph [ref=e22]: 使用当前会话调用空间权限接口，会聚合接口命中的用户 / 用户组 / 组织结构节点 / 节点所在用户组 / 已登录用户权限设置。

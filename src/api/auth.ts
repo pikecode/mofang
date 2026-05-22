@@ -2,28 +2,22 @@
 
 interface AuthConfig {
   enabled: boolean
+  token: string
   username: string
   password: string
 }
 
-// 默认配置 - 通过URL参数或代码配置
-const AUTH_CONFIG: AuthConfig = {
-  enabled: true,
-  username: 'mfiv202602130001',
-  password: '123456',
+function getEnvFlag(value: string | undefined): boolean {
+  return value === 'true'
 }
 
-// 从URL参数覆盖配置
+// 交付环境默认走同源会话，只有显式配置环境变量时才启用TOKEN。
 function getConfig(): AuthConfig {
-  const urlParams = new URLSearchParams(window.location.search)
-  const enabled = urlParams.get('auth')
-  const username = urlParams.get('username')
-  const password = urlParams.get('password')
-
   return {
-    enabled: enabled !== 'false',
-    username: username || AUTH_CONFIG.username,
-    password: password || AUTH_CONFIG.password,
+    enabled: getEnvFlag(import.meta.env.VITE_USE_TOKEN_AUTH),
+    token: import.meta.env.VITE_AUTH_TOKEN || '',
+    username: import.meta.env.VITE_AUTH_USERNAME || '',
+    password: import.meta.env.VITE_AUTH_PASSWORD || '',
   }
 }
 
@@ -33,6 +27,10 @@ const TOKEN_EXPIRES_KEY = 'mf_jwt_expires'
 
 function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)
+}
+
+function normalizeToken(token: string): string {
+  return token.replace(/^Bearer\s+/i, '').trim()
 }
 
 function getStoredRefreshToken(): string | null {
@@ -79,7 +77,7 @@ async function login(username: string, password: string): Promise<string> {
   return data.token
 }
 
-async function refreshAccessToken(): Promise<string | null> {
+async function refreshAccessToken(username: string): Promise<string | null> {
   const refreshToken = getStoredRefreshToken()
   if (!refreshToken) return null
 
@@ -87,7 +85,7 @@ async function refreshAccessToken(): Promise<string | null> {
     const response = await fetch('/magicflu/jwt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `j_refresh=${encodeURIComponent(refreshToken)}`,
+      body: `j_username=${encodeURIComponent(username)}&j_refresh=${encodeURIComponent(refreshToken)}`,
     })
 
     if (!response.ok) return null
@@ -108,6 +106,12 @@ async function ensureToken(): Promise<string> {
 
   // 鉴权禁用，返回空
   if (!config.enabled) return ''
+  if (config.token) {
+    return normalizeToken(config.token)
+  }
+  if (!config.username || !config.password) {
+    throw new Error('TOKEN鉴权已启用，但缺少静态TOKEN或账号密码配置')
+  }
 
   const token = getStoredToken()
   if (token && !isTokenExpired()) {
@@ -116,7 +120,7 @@ async function ensureToken(): Promise<string> {
 
   // 尝试刷新
   if (token) {
-    const refreshed = await refreshAccessToken()
+    const refreshed = await refreshAccessToken(config.username)
     if (refreshed) return refreshed
   }
 
@@ -129,13 +133,9 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   const config = getConfig()
   if (!config.enabled) return {}
 
-  try {
-    const token = await ensureToken()
-    if (!token) return {}
-    return { Authorization: `Bearer ${token}` }
-  } catch {
-    return {}
-  }
+  const token = await ensureToken()
+  if (!token) return {}
+  return { Authorization: `Bearer ${token}` }
 }
 
 // 包装fetch请求 - 自动带TOKEN
@@ -169,7 +169,7 @@ export function getTokenStatus(): {
   const expires = localStorage.getItem(TOKEN_EXPIRES_KEY)
   return {
     enabled: config.enabled,
-    hasToken: !!token,
+    hasToken: !!config.token || !!token,
     expiresAt: expires ? Number(expires) : null,
   }
 }
