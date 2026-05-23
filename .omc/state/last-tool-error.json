@@ -1,7 +1,0 @@
-{
-  "tool_name": "mcp__playwright__browser_navigate",
-  "tool_input_preview": "{\"url\":\"http://localhost:3002/magicflu/jwt\"}",
-  "error": "### Error\nError: browserBackend.callTool: net::ERR_HTTP_RESPONSE_CODE_FAILURE at http://localhost:3002/magicflu/jwt\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3002/magicflu/jwt\", waiting until \"domcontentloaded\"\u001b[22m",
-  "timestamp": "2026-05-22T06:30:29.797Z",
-  "retry_count": 1
-}

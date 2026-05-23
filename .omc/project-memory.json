@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779418068871,
+  "lastScanned": 1779514332469,
   "projectRoot": "/Users/peakom/works/mofang",
   "techStack": {
     "languages": [
@@ -73,7 +73,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 1,
-      "lastAccessed": 1779418068827,
+      "lastAccessed": 1779514332437,
       "keyFiles": [
         "index.html"
       ]
@@ -82,7 +82,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 7,
-      "lastAccessed": 1779418068828,
+      "lastAccessed": 1779514332453,
       "keyFiles": [
         "token使用说明.md",
         "前端开发二阶段考核任务.md",
@@ -95,7 +95,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 4,
-      "lastAccessed": 1779418068848,
+      "lastAccessed": 1779514332453,
       "keyFiles": [
         "App.tsx",
         "index.css",
@@ -107,17 +107,17 @@
       "path": "dist/assets",
       "purpose": "Static assets",
       "fileCount": 2,
-      "lastAccessed": 1779418068850,
+      "lastAccessed": 1779514332454,
       "keyFiles": [
-        "index-BHpJ9Y5W.css",
-        "index-V0jk7_xQ.js"
+        "index-ChGf5gbp.js",
+        "index-r2AQNGs5.css"
       ]
     },
     "src/api": {
       "path": "src/api",
       "purpose": "API routes",
       "fileCount": 2,
-      "lastAccessed": 1779418068852,
+      "lastAccessed": 1779514332455,
       "keyFiles": [
         "auth.ts",
         "permission.ts"
@@ -127,14 +127,14 @@
       "path": "src/components",
       "purpose": "UI components",
       "fileCount": 0,
-      "lastAccessed": 1779418068854,
+      "lastAccessed": 1779514332455,
       "keyFiles": []
     },
     "src/lib": {
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 1,
-      "lastAccessed": 1779418068856,
+      "lastAccessed": 1779514332456,
       "keyFiles": [
         "utils.ts"
       ]
@@ -143,7 +143,7 @@
       "path": "src/types",
       "purpose": "Type definitions",
       "fileCount": 1,
-      "lastAccessed": 1779418068859,
+      "lastAccessed": 1779514332456,
       "keyFiles": [
         "index.ts"
       ]
@@ -158,8 +158,8 @@
     },
     {
       "path": "src/hooks/usePermissionQuery.ts",
-      "accessCount": 54,
-      "lastAccessed": 1779431697963,
+      "accessCount": 55,
+      "lastAccessed": 1779528790943,
       "type": "file"
     },
     {
@@ -194,8 +194,8 @@
     },
     {
       "path": ".env",
-      "accessCount": 4,
-      "lastAccessed": 1779430725752,
+      "accessCount": 6,
+      "lastAccessed": 1779515404311,
       "type": "file"
     },
     {
